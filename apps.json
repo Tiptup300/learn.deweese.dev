@@ -1,10 +1,16 @@
 {
   "apps": [
     {
-      "title": "Number Bonds",
-      "description": "Practice number bonds.",
+      "title": "Number Bonds Addition",
+      "description": "Practice addition number bonds with fun drag-and-drop!",
       "color": "#4CAF50",
-      "path": "/number-bonds"
+      "path": "/number-bonds-addition"
+    },
+    {
+      "title": "Number Bonds Subtraction",
+      "description": "Practice subtraction number bonds!",
+      "color": "#FF6B6B",
+      "path": "/number-bonds-subtraction"
     }
   ]
 }
