@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart GingerSnaps</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900;1000&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+
+/* =====================
+   RESET & GLOBALS
+===================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  background: #fff8f0;
+}
+
+/* =====================
+   SCREEN SYSTEM
+===================== */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+}
+.screen.active { display: flex; }
+
+/* =====================
+   COLOR TOKENS
+===================== */
+:root {
+  --ginger:    #e8621a;
+  --ginger-lt: #ff8c3a;
+  --ginger-dk: #b84c10;
+  --cream:     #fff8f0;
+  --blue:      #2d7ef5;
+  --blue-lt:   #5599ff;
+  --green:     #18b870;
+  --red:       #f02a4a;
+  --yellow:    #f5c518;
+  --purple:    #7c44f0;
+  --text:      #1a1a2e;
+  --muted:     #777;
+  --border:    rgba(0,0,0,0.08);
+}
+
+/* =====================
+   HOME SCREEN
+===================== */
+#home-screen {
+  /* picsum seed "autumn" — warm golden light through trees, amber tones */
+  background: var(--cream) url('https://picsum.photos/seed/autumn/1920/1080') center/cover no-repeat;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4vh, 48px);
+  position: relative;
+}
+#home-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,248,240,0.84);
+  pointer-events: none;
+  z-index: 0;
+}
+#home-screen > * { position: relative; z-index: 1; }
+
+/* Top bar with back link */
+.home-topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  padding: clamp(14px, 2vh, 22px) clamp(20px, 3vw, 36px);
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: clamp(0.8rem, 1.6vw, 1rem);
+  font-weight: 700;
+  transition: color 0.15s;
+}
+.back-link:hover { color: var(--ginger); }
+.back-link svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+/* Cookie mascot area */
+.home-mascot {
+  font-size: clamp(4rem, 14vw, 10rem);
+  line-height: 1;
+  animation: mascotBob 2.8s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(232,98,26,0.25));
+}
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%       { transform: translateY(-12px) rotate(3deg); }
+}
+
+.home-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.home-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 1000;
+  font-size: clamp(2.4rem, 8vw, 6rem);
+  color: var(--ginger);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.home-title span { color: var(--ginger-dk); }
+.home-tagline {
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* Play button */
+.play-btn {
+  width: clamp(90px, 16vw, 160px);
+  height: clamp(90px, 16vw, 160px);
+  border-radius: 50%;
+  border: none;
+  background: var(--ginger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 0 var(--ginger-dk), 0 10px 40px rgba(232,98,26,0.35);
+  transition: transform 0.1s, box-shadow 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+.play-btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 var(--ginger-dk), 0 14px 48px rgba(232,98,26,0.4); }
+.play-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--ginger-dk), 0 6px 24px rgba(232,98,26,0.3); }
+.play-btn svg { width: 42%; height: 42%; fill: white; margin-left: 8%; }
+
+.tap-hint {
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* =====================
+   LEVEL SELECT
+===================== */
+#level-screen {
+  /* picsum seed "field" — open green field, bright and airy */
+  background: var(--cream) url('https://picsum.photos/seed/field/1920/1080') center/cover no-repeat;
+  position: relative;
+}
+#level-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,248,240,0.88);
+  pointer-events: none;
+  z-index: 0;
+}
+#level-screen > * { position: relative; z-index: 1; }
+
+.level-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: clamp(12px, 2vh, 20px) clamp(16px, 3vw, 28px);
+  background: white;
+  border-bottom: 2px solid var(--border);
+  gap: 14px;
+}
+.icon-btn {
+  width: clamp(40px, 6vw, 52px);
+  height: clamp(40px, 6vw, 52px);
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: white;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+  color: var(--text);
+}
+.icon-btn:hover { background: #f0f0f0; transform: scale(1.05); }
+.icon-btn:active { transform: scale(0.95); }
+.icon-btn svg { width: 52%; height: 52%; fill: var(--text); }
+
+.level-header-title {
+  font-weight: 900;
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
+  color: var(--text);
+  flex: 1;
+  text-align: center;
+}
+/* spacer to center title */
+.level-header .spacer { width: clamp(40px, 6vw, 52px); flex-shrink: 0; }
+
+.level-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(16px, 2.5vw, 28px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--ginger) transparent;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(12px, 2vw, 20px);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Level cards */
+.level-card {
+  aspect-ratio: 1;
+  border-radius: clamp(18px, 2.5vw, 28px);
+  border: 3px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1vh, 10px);
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.12s, box-shadow 0.12s;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+}
+/* photo sits behind a strong color overlay */
+.level-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+}
+.level-card > * { position: relative; z-index: 1; }
+
+.level-card.unlocked {
+  box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+}
+.level-card.unlocked:hover  { transform: translateY(-4px); box-shadow: 0 10px 0 rgba(0,0,0,0.1); }
+.level-card.unlocked:active { transform: translateY(2px);  box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+.level-card.locked {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(0.5);
+  box-shadow: none;
+}
+
+.lc-icon  { font-size: clamp(1.8rem, 5vw, 3.8rem); line-height: 1; }
+.lc-num   { font-weight: 900; font-size: clamp(0.75rem, 2vw, 1.3rem); color: white; line-height: 1; }
+.lc-name  { font-weight: 800; font-size: clamp(0.5rem, 1.2vw, 0.8rem); color: rgba(255,255,255,0.88); text-align: center; }
+.lock-icon { position: absolute; bottom: 8px; right: 10px; font-size: clamp(0.9rem, 2vw, 1.4rem); opacity: 0.7; }
+
+/* Card colour themes — solid color as ::before overlay over photo */
+.lc-t1 { border-color: #1a5cbf; } .lc-t1::before { background: rgba(45,126,245,0.78); }
+.lc-t2 { border-color: #b84c10; } .lc-t2::before { background: rgba(232,98,26,0.78); }
+.lc-t3 { border-color: #0e8a52; } .lc-t3::before { background: rgba(24,184,112,0.78); }
+.lc-t4 { border-color: #b51e38; } .lc-t4::before { background: rgba(240,42,74,0.78); }
+.lc-t5 { border-color: #5a2fc0; } .lc-t5::before { background: rgba(124,68,240,0.78); }
+.lc-t6 { border-color: #c29a00; } .lc-t6::before { background: rgba(245,197,24,0.82); }
+.lc-t7 { border-color: #0090a8; } .lc-t7::before { background: rgba(0,188,212,0.78); }
+.lc-t8 { border-color: #cc4a3d; } .lc-t8::before { background: rgba(255,111,97,0.78); }
+.lc-t9 { border-color: #2d6e30; } .lc-t9::before { background: rgba(67,160,71,0.78); }
+
+/* =====================
+   GAME SCREEN
+===================== */
+#game-screen {
+  /* picsum seed "mountain" — bright mountain landscape, energising */
+  background: var(--cream) url('https://picsum.photos/seed/mountain/1920/1080') center/cover no-repeat;
+  position: relative;
+}
+#game-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,248,240,0.86);
+  pointer-events: none;
+  z-index: 0;
+}
+#game-screen > * { position: relative; z-index: 1; }
+
+/* TOP BAR — fixed height, no layout shift */
+.game-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: clamp(10px, 1.8vh, 18px) clamp(12px, 2vw, 22px);
+  background: white;
+  border-bottom: 2px solid var(--border);
+  gap: 12px;
+  height: clamp(64px, 10vh, 90px);
+}
+
+/* Left: home button — fixed width */
+.topbar-left {
+  flex: 0 0 clamp(40px, 6vw, 52px);
+}
+
+/* Center: level + progress — fixed, no reflow */
+.topbar-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  min-width: 0;
+}
+.tc-level {
+  font-weight: 900;
+  font-size: clamp(0.65rem, 1.4vw, 0.9rem);
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.tc-progress {
+  font-weight: 900;
+  font-size: clamp(0.85rem, 1.8vw, 1.15rem);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Pip bar — fixed height, won't jump */
+.pip-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(3px, 0.6vw, 6px);
+  height: 14px;     /* fixed height so it doesn't shift */
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.pip {
+  width: clamp(8px, 1.2vw, 12px);
+  height: clamp(8px, 1.2vw, 12px);
+  border-radius: 50%;
+  background: #e0ddd8;
+  flex-shrink: 0;
+  transition: background 0.25s, transform 0.25s;
+}
+.pip.done    { background: var(--green); transform: scale(1.05); }
+.pip.current { background: var(--ginger); transform: scale(1.15); }
+
+/* Right: timer — fixed width, won't shift layout */
+.topbar-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0ebe4;
+  border-radius: 12px;
+  padding: clamp(6px, 1vw, 10px) clamp(10px, 1.6vw, 16px);
+  /* Fixed min-width so changing digits don't resize it */
+  min-width: clamp(72px, 10vw, 110px);
+  justify-content: center;
+}
+.timer-icon { font-size: clamp(0.85rem, 1.5vw, 1.1rem); }
+#timer-display {
+  font-weight: 900;
+  font-size: clamp(0.9rem, 2vw, 1.3rem);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: 1px;
+  /* Monospace numbers — won't shift */
+  font-family: 'Nunito', monospace;
+  min-width: 3.5ch;
+  text-align: right;
+}
+
+/* GAME AREA */
+.game-area {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: clamp(14px, 3vw, 40px);
+  padding: clamp(16px, 3vh, 36px) clamp(16px, 4vw, 48px);
+  overflow: hidden;
+}
+
+/* PROBLEM SIDE */
+.problem-side {
+  flex: 1.3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;       /* panel stays left */
+  gap: 0;
+  background: white;
+  border-radius: clamp(18px, 2.5vw, 30px);
+  border: 3px solid var(--border);
+  padding: clamp(20px, 4vw, 48px);
+  box-shadow: 0 4px 0 var(--border);
+}
+
+/* Inner column: right-aligned so both rows line up on their right edge */
+.prob-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: clamp(2px, 0.8vh, 8px);
+}
+
+/* Shared number size for both rows */
+.prob-num1 {
+  font-weight: 1000;
+  font-size: clamp(3.5rem, 11vw, 9rem);
+  color: var(--text);
+  line-height: 1.05;
+  letter-spacing: -3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.prob-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.5vw, 16px);
+}
+.prob-op {
+  font-weight: 900;
+  font-size: clamp(1.8rem, 5vw, 4.5rem);
+  line-height: 1.05;
+  color: var(--ginger);
+  letter-spacing: -1px;
+  align-self: center;
+}
+.prob-num2 {
+  font-weight: 1000;
+  font-size: clamp(3.5rem, 11vw, 9rem);
+  color: var(--blue);
+  line-height: 1.05;
+  letter-spacing: -3px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Divider line sits BELOW the bottom row */
+.prob-divider {
+  width: 100%;
+  height: 4px;
+  background: #d0ccc6;
+  border-radius: 2px;
+  margin-top: clamp(4px, 1vh, 10px);
+}
+
+/* unused but kept for safety */
+.prob-eq   { display: none; }
+.prob-blank { display: none; }
+
+/* CHOICES SIDE */
+.choices-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(10px, 2vh, 20px);
+}
+
+.choice-btn {
+  flex: 1;
+  max-height: clamp(80px, 20vh, 170px);
+  border-radius: clamp(14px, 2vw, 24px);
+  border: 3px solid transparent;
+  cursor: pointer;
+  font-weight: 1000;
+  font-size: clamp(2rem, 5.5vw, 5rem);
+  color: white;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  transition: transform 0.1s, box-shadow 0.1s;
+  position: relative;
+}
+.choice-btn:hover:not(:disabled) { transform: translateY(-3px); }
+.choice-btn:active:not(:disabled) { transform: translateY(2px); }
+.choice-btn:disabled { cursor: default; }
+
+.choice-btn:nth-child(1) {
+  background: #2d7ef5;
+  box-shadow: 0 5px 0 #1a5cbf;
+}
+.choice-btn:nth-child(2) {
+  background: #e8621a;
+  box-shadow: 0 5px 0 #b84c10;
+}
+.choice-btn:nth-child(3) {
+  background: #7c44f0;
+  box-shadow: 0 5px 0 #5a2fc0;
+}
+.choice-btn:nth-child(1):hover:not(:disabled) { box-shadow: 0 8px 0 #1a5cbf; }
+.choice-btn:nth-child(2):hover:not(:disabled) { box-shadow: 0 8px 0 #b84c10; }
+.choice-btn:nth-child(3):hover:not(:disabled) { box-shadow: 0 8px 0 #5a2fc0; }
+.choice-btn:nth-child(1):active:not(:disabled) { box-shadow: 0 2px 0 #1a5cbf; }
+.choice-btn:nth-child(2):active:not(:disabled) { box-shadow: 0 2px 0 #b84c10; }
+.choice-btn:nth-child(3):active:not(:disabled) { box-shadow: 0 2px 0 #5a2fc0; }
+
+/* Correct / Wrong feedback */
+.choice-btn.state-correct {
+  background: var(--green) !important;
+  border-color: #0e8a52 !important;
+  box-shadow: 0 5px 0 #0e8a52 !important;
+  animation: correctPop 0.4s ease;
+}
+.choice-btn.state-wrong {
+  background: var(--red) !important;
+  border-color: #aa1a2e !important;
+  box-shadow: 0 5px 0 #aa1a2e !important;
+  animation: wrongShake 0.42s ease;
+}
+@keyframes correctPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  70%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+@keyframes wrongShake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-10px); }
+  40%     { transform: translateX(10px); }
+  60%     { transform: translateX(-6px); }
+  80%     { transform: translateX(6px); }
+}
+
+/* =====================
+   COMPLETE SCREEN
+===================== */
+#complete-screen {
+  /* picsum seed "sunshine" — golden sunshine bursting through clouds */
+  background: var(--cream) url('https://picsum.photos/seed/sunshine/1920/1080') center/cover no-repeat;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+#complete-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,248,240,0.82);
+  pointer-events: none;
+  z-index: 0;
+}
+#complete-screen > * { position: relative; z-index: 1; }
+.complete-card {
+  background: white;
+  border-radius: clamp(24px, 4vw, 40px);
+  border: 3px solid var(--border);
+  box-shadow: 0 8px 0 var(--border);
+  padding: clamp(28px, 5vw, 60px);
+  max-width: min(90vw, 500px);
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 2.5vh, 28px);
+}
+.complete-trophy { font-size: clamp(4rem, 12vw, 8rem); animation: mascotBob 2.5s ease-in-out infinite; }
+.complete-title {
+  font-weight: 1000;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  color: var(--ginger);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.complete-sub {
+  font-weight: 700;
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.complete-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff8f0;
+  border: 2px solid rgba(232,98,26,0.2);
+  border-radius: 16px;
+  padding: clamp(10px, 1.5vh, 16px) clamp(20px, 3vw, 32px);
+}
+.complete-stat-icon { font-size: clamp(1.1rem, 2.5vw, 1.6rem); }
+.complete-stat-val {
+  font-weight: 900;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  color: var(--ginger);
+  font-variant-numeric: tabular-nums;
+}
+.complete-btns {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.comp-btn {
+  flex: 1;
+  min-width: clamp(110px, 24vw, 190px);
+  padding: clamp(12px, 2vh, 18px);
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  letter-spacing: 0.3px;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.comp-btn:hover { transform: translateY(-2px); }
+.comp-btn:active { transform: translateY(1px); }
+.comp-btn.again {
+  background: var(--ginger);
+  color: white;
+  box-shadow: 0 4px 0 var(--ginger-dk);
+}
+.comp-btn.menu {
+  background: #f0ebe4;
+  color: var(--text);
+  box-shadow: 0 4px 0 #d8cfc6;
+}
+
+/* =====================
+   ABANDON MODAL
+===================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,26,46,0.55);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: 28px;
+  border: 3px solid var(--border);
+  box-shadow: 0 8px 0 rgba(0,0,0,0.1);
+  padding: clamp(28px, 5vw, 52px);
+  max-width: min(90vw, 420px);
+  width: 100%;
+  text-align: center;
+  animation: modalIn 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-emoji { font-size: clamp(2.5rem, 6vw, 4rem); }
+.modal-title {
+  font-weight: 900;
+  font-size: clamp(1.3rem, 3.5vw, 2rem);
+  color: var(--text);
+  margin-top: 4px;
+}
+.modal-text {
+  font-size: clamp(0.82rem, 1.8vw, 1rem);
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+.modal-btns { display: flex; gap: 12px; width: 100%; }
+.modal-btn {
+  flex: 1;
+  padding: clamp(12px, 2vh, 16px);
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: clamp(0.88rem, 2vw, 1.1rem);
+  transition: transform 0.1s;
+}
+.modal-btn:hover  { transform: scale(1.03); }
+.modal-btn:active { transform: scale(0.97); }
+.modal-btn.keep {
+  background: #f0ebe4;
+  color: var(--text);
+  box-shadow: 0 3px 0 #d8cfc6;
+}
+.modal-btn.quit {
+  background: var(--red);
+  color: white;
+  box-shadow: 0 3px 0 #aa1a2e;
+}
+
+/* =====================
+   CONFETTI
+===================== */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ======== HOME ======== -->
+<div id="home-screen" class="screen active">
+  <div class="home-topbar">
+    <a class="back-link" href="https://sadie.deweese.dev/">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      sadie.deweese.dev
+    </a>
+  </div>
+  <div class="home-mascot" aria-hidden="true">🍪</div>
+  <div class="home-brand">
+    <div class="home-title">Smart<span>Ginger</span>Snaps</div>
+    <div class="home-tagline">Math Practice for Kids</div>
+  </div>
+  <button class="play-btn" id="play-btn" aria-label="Start playing">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <div class="tap-hint">Tap to Play</div>
+</div>
+
+<!-- ======== LEVEL SELECT ======== -->
+<div id="level-screen" class="screen">
+  <div class="level-header">
+    <button class="icon-btn" id="back-to-home-btn" aria-label="Back to home">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </button>
+    <div class="level-header-title">Pick a Level</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="level-scroll">
+    <div class="level-grid" id="level-grid"></div>
+  </div>
+</div>
+
+<!-- ======== GAME ======== -->
+<div id="game-screen" class="screen">
+
+  <div class="game-topbar">
+    <!-- Fixed-width left zone -->
+    <div class="topbar-left">
+      <button class="icon-btn" id="home-icon-btn" aria-label="Go home">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </button>
+    </div>
+
+    <!-- Center zone — fixed, no reflow -->
+    <div class="topbar-center">
+      <div class="tc-level" id="tc-level">Level 1 — +1 Addition</div>
+      <div class="tc-progress" id="tc-progress">Problem 1 of 10</div>
+      <div class="pip-row" id="pip-row"></div>
+    </div>
+
+    <!-- Fixed-width right zone -->
+    <div class="topbar-right">
+      <span class="timer-icon" aria-hidden="true">⏱</span>
+      <span id="timer-display">0:00</span>
+    </div>
+  </div>
+
+  <div class="game-area">
+    <div class="problem-side" id="problem-side">
+      <div class="prob-stack">
+        <div class="prob-num1" id="prob-num1">9</div>
+        <div class="prob-row">
+          <div class="prob-op"   id="prob-op">+</div>
+          <div class="prob-num2" id="prob-num2">1</div>
+        </div>
+        <div class="prob-divider"></div>
+      </div>
+    </div>
+
+    <div class="choices-side" id="choices-side">
+      <button class="choice-btn" data-idx="0"></button>
+      <button class="choice-btn" data-idx="1"></button>
+      <button class="choice-btn" data-idx="2"></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ======== COMPLETE ======== -->
+<div id="complete-screen" class="screen">
+  <div class="complete-card">
+    <div class="complete-trophy">🏆</div>
+    <div class="complete-title">You did it!</div>
+    <div class="complete-sub" id="complete-sub">Level 1 Complete</div>
+    <div class="complete-stat">
+      <span class="complete-stat-icon">⏱</span>
+      <span class="complete-stat-val" id="complete-time">0:00</span>
+    </div>
+    <div class="complete-btns">
+      <button class="comp-btn again" id="play-again-btn">🔁 Play Again</button>
+      <button class="comp-btn menu"  id="back-to-levels-btn">📋 All Levels</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== ABANDON MODAL ======== -->
+<div class="modal-overlay" id="abandon-modal">
+  <div class="modal-box">
+    <div class="modal-emoji">🏠</div>
+    <div class="modal-title">Go Home?</div>
+    <p class="modal-text">Your progress will be lost.<br>Are you sure you want to quit?</p>
+    <div class="modal-btns">
+      <button class="modal-btn keep" id="modal-keep">Keep Playing</button>
+      <button class="modal-btn quit" id="modal-quit">Quit</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+<script>
+/* =====================
+   LEVELS DATA
+===================== */
+const LEVELS = [
+  {
+    id:1, name:'+1 Addition',    icon:'⭐', theme:'lc-t1', unlocked:true,
+    photo:'https://picsum.photos/seed/stars1/400/400',
+    problems:[
+      {n1:0,op:'+',n2:1,ans:1},{n1:1,op:'+',n2:1,ans:2},{n1:2,op:'+',n2:1,ans:3},
+      {n1:3,op:'+',n2:1,ans:4},{n1:4,op:'+',n2:1,ans:5},{n1:5,op:'+',n2:1,ans:6},
+      {n1:6,op:'+',n2:1,ans:7},{n1:7,op:'+',n2:1,ans:8},{n1:8,op:'+',n2:1,ans:9},
+      {n1:9,op:'+',n2:1,ans:10},
+    ]
+  },
+  {
+    id:2, name:'-1 Subtraction', icon:'🌟', theme:'lc-t2', unlocked:true,
+    photo:'https://picsum.photos/seed/sunset2/400/400',
+    problems:[
+      {n1:10,op:'-',n2:1,ans:9},{n1:9,op:'-',n2:1,ans:8},{n1:8,op:'-',n2:1,ans:7},
+      {n1:7,op:'-',n2:1,ans:6},{n1:6,op:'-',n2:1,ans:5},{n1:5,op:'-',n2:1,ans:4},
+      {n1:4,op:'-',n2:1,ans:3},{n1:3,op:'-',n2:1,ans:2},{n1:2,op:'-',n2:1,ans:1},
+      {n1:1,op:'-',n2:1,ans:0},
+    ]
+  },
+  {id:3, name:'+2 Addition',    icon:'🚀', theme:'lc-t3', unlocked:false, photo:'https://picsum.photos/seed/forest3/400/400',  problems:[]},
+  {id:4, name:'-2 Subtraction', icon:'🔥', theme:'lc-t4', unlocked:false, photo:'https://picsum.photos/seed/canyon4/400/400',  problems:[]},
+  {id:5, name:'+3 Addition',    icon:'🎯', theme:'lc-t5', unlocked:false, photo:'https://picsum.photos/seed/bloom5/400/400',   problems:[]},
+  {id:6, name:'-3 Subtraction', icon:'💎', theme:'lc-t6', unlocked:false, photo:'https://picsum.photos/seed/desert6/400/400', problems:[]},
+  {id:7, name:'Mix +/-',        icon:'🎪', theme:'lc-t7', unlocked:false, photo:'https://picsum.photos/seed/ocean7/400/400',  problems:[]},
+  {id:8, name:'Big Numbers',    icon:'👾', theme:'lc-t8', unlocked:false, photo:'https://picsum.photos/seed/city8/400/400',   problems:[]},
+  {id:9, name:'Challenge!',     icon:'👑', theme:'lc-t9', unlocked:false, photo:'https://picsum.photos/seed/peak9/400/400',   problems:[]},
+];
+
+/* =====================
+   STATE
+===================== */
+let currentLevel = null;
+let problems = [];
+let problemIndex = 0;
+let timerInterval = null;
+let elapsed = 0;
+let locked = false;
+
+/* =====================
+   HELPERS
+===================== */
+const $ = id => document.getElementById(id);
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function fmtTime(s) {
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+/* =====================
+   WEB AUDIO SOUNDS
+   (synthesized — no files needed)
+===================== */
+let audioCtx = null;
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type) {
+  try {
+    const ctx = getCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    if (type === 'correct') {
+      // Bright two-note ascending chime: C5 → E5
+      [523.25, 659.25].forEach((freq, i) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + i * 0.13;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.38, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+        osc.start(t); osc.stop(t + 0.35);
+      });
+
+    } else if (type === 'wrong') {
+      // Low dull thud — short detuned buzz
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.18);
+      gain.gain.setValueAtTime(0.28, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.25);
+
+    } else if (type === 'win') {
+      // Cheerful ascending fanfare: C5 E5 G5 C6
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + i * 0.14;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.32, t + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+        osc.start(t); osc.stop(t + 0.4);
+      });
+      // Add a little shimmer chord on top at the end
+      [1318.5, 1567.98].forEach((freq, i) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + 0.56 + i * 0.06;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.18, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+        osc.start(t); osc.stop(t + 0.5);
+      });
+    }
+  } catch(e) { /* audio blocked — fail silently */ }
+}
+
+/* =====================
+   BUILD LEVEL GRID
+===================== */
+function buildGrid() {
+  const grid = $('level-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach(lv => {
+    const card = document.createElement('div');
+    card.className = `level-card ${lv.theme} ${lv.unlocked ? 'unlocked' : 'locked'}`;
+    card.style.backgroundImage = `url('${lv.photo}')`;
+    card.innerHTML = `
+      <div class="lc-icon">${lv.icon}</div>
+      <div class="lc-num">Level ${lv.id}</div>
+      <div class="lc-name">${lv.name}</div>
+      ${!lv.unlocked ? '<div class="lock-icon">🔒</div>' : ''}
+    `;
+    if (lv.unlocked) {
+      card.addEventListener('click', () => startLevel(lv));
+    }
+    grid.appendChild(card);
+  });
+}
+
+/* =====================
+   WRONG CHOICE GENERATOR
+===================== */
+function makeWrongs(correct) {
+  const wrongs = new Set();
+  let d = 1;
+  while (wrongs.size < 2) {
+    [correct + d, correct - d].forEach(v => {
+      if (v >= 0 && v !== correct && wrongs.size < 2) wrongs.add(v);
+    });
+    d++;
+  }
+  return [...wrongs];
+}
+
+/* =====================
+   START LEVEL
+===================== */
+function startLevel(lv) {
+  currentLevel = lv;
+  problems = shuffle(lv.problems);
+  problemIndex = 0;
+  elapsed = 0;
+  locked = false;
+
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => { elapsed++; updateTimer(); }, 1000);
+
+  $('tc-level').textContent = `Level ${lv.id} — ${lv.name}`;
+  updateTimer();
+  buildPips();
+  showScreen('game-screen');
+  renderProblem(true);
+}
+
+/* =====================
+   PIPS
+===================== */
+function buildPips() {
+  const row = $('pip-row');
+  row.innerHTML = '';
+  problems.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'pip';
+    pip.id = `pip-${i}`;
+    row.appendChild(pip);
+  });
+  updatePips();
+}
+function updatePips() {
+  problems.forEach((_, i) => {
+    const pip = $(`pip-${i}`);
+    if (!pip) return;
+    pip.className = 'pip' + (i < problemIndex ? ' done' : i === problemIndex ? ' current' : '');
+  });
+}
+
+/* =====================
+   RENDER PROBLEM
+===================== */
+function renderProblem(first) {
+  locked = false;
+  const p = problems[problemIndex];
+  const total = problems.length;
+
+  $('tc-progress').textContent = `Problem ${problemIndex + 1} of ${total}`;
+  updatePips();
+
+  const side = $('problem-side');
+  if (!first) {
+    side.style.opacity = '0';
+    side.style.transform = 'translateY(8px)';
+    side.style.transition = 'none';
+  }
+
+  setTimeout(() => {
+    $('prob-num1').textContent = p.n1;
+    $('prob-op').textContent   = p.op;
+    $('prob-num2').textContent = p.n2;
+    side.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+    side.style.opacity = '1';
+    side.style.transform = 'translateY(0)';
+  }, first ? 0 : 80);
+
+  // Build answer choices
+  const [w1, w2] = makeWrongs(p.ans);
+  const choices = shuffle([p.ans, w1, w2]);
+  document.querySelectorAll('.choice-btn').forEach((btn, i) => {
+    btn.textContent = choices[i];
+    btn.dataset.val = choices[i];
+    btn.className = 'choice-btn';
+    btn.disabled = false;
+  });
+}
+
+/* =====================
+   TIMER
+===================== */
+function updateTimer() {
+  $('timer-display').textContent = fmtTime(elapsed);
+}
+
+/* =====================
+   ANSWER HANDLER
+===================== */
+$('choices-side').addEventListener('click', e => {
+  if (locked) return;
+  const btn = e.target.closest('.choice-btn');
+  if (!btn || btn.disabled) return;
+
+  const chosen = parseInt(btn.dataset.val);
+  const correct = problems[problemIndex].ans;
+
+  if (chosen === correct) {
+    locked = true;
+    btn.classList.add('state-correct');
+    playSound('correct');
+    setTimeout(() => {
+      problemIndex++;
+      if (problemIndex >= problems.length) {
+        finishLevel();
+      } else {
+        renderProblem(false);
+      }
+    }, 520);
+  } else {
+    btn.classList.add('state-wrong');
+    btn.disabled = true;
+    playSound('wrong');
+    setTimeout(() => {
+      btn.classList.remove('state-wrong');
+      btn.disabled = false;
+    }, 480);
+  }
+});
+
+/* =====================
+   FINISH LEVEL
+===================== */
+function finishLevel() {
+  clearInterval(timerInterval);
+  $('complete-sub').textContent  = `Level ${currentLevel.id} — ${currentLevel.name}`;
+  $('complete-time').textContent = fmtTime(elapsed);
+  showScreen('complete-screen');
+  launchConfetti();
+  playSound('win');
+}
+
+/* =====================
+   HOME / ABANDON
+===================== */
+$('home-icon-btn').addEventListener('click', () => $('abandon-modal').classList.add('active'));
+$('modal-keep').addEventListener('click', () => $('abandon-modal').classList.remove('active'));
+$('modal-quit').addEventListener('click', () => {
+  $('abandon-modal').classList.remove('active');
+  clearInterval(timerInterval);
+  showScreen('level-screen');
+});
+
+/* =====================
+   NAV
+===================== */
+$('play-btn').addEventListener('click', () => showScreen('level-screen'));
+$('back-to-home-btn').addEventListener('click', () => showScreen('home-screen'));
+$('play-again-btn').addEventListener('click', () => { stopConfetti(); startLevel(currentLevel); });
+$('back-to-levels-btn').addEventListener('click', () => { stopConfetti(); showScreen('level-screen'); });
+
+/* =====================
+   CONFETTI
+===================== */
+const canvas = $('confetti-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let confettiActive = false;
+let rafId = null;
+
+const COLORS = ['#e8621a','#2d7ef5','#18b870','#f5c518','#7c44f0','#f02a4a','#00bcd4','#ff6f61'];
+
+function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function launchConfetti() {
+  particles = [];
+  confettiActive = true;
+  for (let i = 0; i < 220; i++) {
+    const isRect = Math.random() > 0.45;
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * canvas.height * 0.5,
+      vx: (Math.random() - 0.5) * 5,
+      vy: Math.random() * 3.5 + 1.5,
+      rot: Math.random() * 360,
+      rotV: (Math.random() - 0.5) * 8,
+      w: Math.random() * 14 + 7,
+      h: Math.random() * 7 + 4,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      isRect,
+      gravity: 0.055 + Math.random() * 0.04,
+    });
+  }
+  renderConfetti();
+}
+
+function renderConfetti() {
+  if (!confettiActive) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  let alive = 0;
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.rot += p.rotV;
+    if (p.y > canvas.height + 40) return;
+    alive++;
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    if (p.isRect) {
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    } else {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.w/2, p.h/2, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+  if (alive > 0) { rafId = requestAnimationFrame(renderConfetti); }
+  else { ctx.clearRect(0, 0, canvas.width, canvas.height); confettiActive = false; }
+}
+
+function stopConfetti() {
+  confettiActive = false;
+  if (rafId) cancelAnimationFrame(rafId);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = [];
+}
+
+/* =====================
+   INIT
+===================== */
+buildGrid();
+</script>
+</body>
+</html>
