@@ -11,6 +11,12 @@
       "description": "Practice subtraction number bonds!",
       "color": "#FF6B6B",
       "path": "/number-bonds-subtraction"
+    },
+    {
+      "title": "Smart GingerSnaps!",
+      "description": "A free simple level based game for practicing math problems!",
+      "color": "#0000FF",
+      "path": "/smart-gingersnaps"
     }
   ]
 }
