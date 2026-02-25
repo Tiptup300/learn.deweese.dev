@@ -1,0 +1,24 @@
+{
+  "name": "Smart GingerSnaps",
+  "short_name": "GingerSnaps",
+  "description": "Fun addition and subtraction math practice for kids!",
+  "start_url": "https://learn.deweese.dev/smart-gingersnaps",
+  "display": "standalone",
+  "background_color": "#fff8f0",
+  "theme_color": "#e8621a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

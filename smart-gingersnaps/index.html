@@ -2,14 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Smart GingerSnaps</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900;1000&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+<!-- ── PWA: theme & iOS standalone ── -->
+<meta name="theme-color" content="#e8621a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GingerSnaps">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Smart GingerSnaps">
+<meta name="description" content="Fun addition and subtraction math practice for kids!">
+
+<!-- ── PWA: apple touch icon (inline SVG cookie) ── -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Ccircle cx='96' cy='96' r='96' fill='%23e8621a'/%3E%3Ccircle cx='96' cy='96' r='74' fill='%23ff8c3a'/%3E%3Ccircle cx='70' cy='75' r='9' fill='%23b84c10'/%3E%3Ccircle cx='116' cy='70' r='7' fill='%23b84c10'/%3E%3Ccircle cx='85' cy='110' r='8' fill='%23b84c10'/%3E%3Ccircle cx='120' cy='105' r='10' fill='%23b84c10'/%3E%3Ccircle cx='96' cy='88' r='6' fill='%23b84c10'/%3E%3C/svg%3E">
+
+<!-- ── PWA: Web App Manifest ── -->
+<link rel="manifest" href="manifest.json">
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900;1000&display=swap" rel="stylesheet">
 <style>
 
-/* =====================
-   RESET & GLOBALS
-===================== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
   width: 100%; height: 100%; overflow: hidden;
@@ -17,711 +30,383 @@ html, body {
   background: #fff8f0;
 }
 
-/* =====================
-   SCREEN SYSTEM
-===================== */
-.screen {
-  position: fixed;
-  inset: 0;
-  display: none;
-  flex-direction: column;
-}
+.screen { position: fixed; inset: 0; display: none; flex-direction: column; }
 .screen.active { display: flex; }
 
-/* =====================
-   COLOR TOKENS
-===================== */
 :root {
   --ginger:    #e8621a;
   --ginger-lt: #ff8c3a;
   --ginger-dk: #b84c10;
   --cream:     #fff8f0;
   --blue:      #2d7ef5;
-  --blue-lt:   #5599ff;
   --green:     #18b870;
   --red:       #f02a4a;
-  --yellow:    #f5c518;
-  --purple:    #7c44f0;
   --text:      #1a1a2e;
   --muted:     #777;
   --border:    rgba(0,0,0,0.08);
 }
 
-/* =====================
-   HOME SCREEN
-===================== */
+/* ── HOME ── */
 #home-screen {
-  /* picsum seed "autumn" — warm golden light through trees, amber tones */
-  background: var(--cream) url('https://picsum.photos/seed/autumn/1920/1080') center/cover no-repeat;
+  background: var(--cream);
   align-items: center;
   justify-content: center;
-  gap: clamp(24px, 4vh, 48px);
-  position: relative;
+  gap: clamp(18px, 3.5vh, 40px);
 }
-#home-screen::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,248,240,0.84);
-  pointer-events: none;
-  z-index: 0;
-}
-#home-screen > * { position: relative; z-index: 1; }
-
-/* Top bar with back link */
 .home-topbar {
   position: absolute;
   top: 0; left: 0; right: 0;
-  display: flex;
-  align-items: center;
-  padding: clamp(14px, 2vh, 22px) clamp(20px, 3vw, 36px);
+  padding: clamp(14px,2vh,22px) clamp(20px,3vw,36px);
 }
 .back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  text-decoration: none;
-  color: var(--muted);
-  font-size: clamp(0.8rem, 1.6vw, 1rem);
-  font-weight: 700;
+  display: inline-flex; align-items: center; gap: 7px;
+  text-decoration: none; color: var(--muted);
+  font-size: clamp(0.8rem,1.6vw,1rem); font-weight: 700;
   transition: color 0.15s;
 }
 .back-link:hover { color: var(--ginger); }
-.back-link svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+.back-link svg { width: 16px; height: 16px; fill: currentColor; }
 
-/* Cookie mascot area */
 .home-mascot {
-  font-size: clamp(4rem, 14vw, 10rem);
-  line-height: 1;
+  font-size: clamp(4rem,12vw,9rem); line-height: 1;
   animation: mascotBob 2.8s ease-in-out infinite;
   filter: drop-shadow(0 8px 20px rgba(232,98,26,0.25));
 }
 @keyframes mascotBob {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50%       { transform: translateY(-12px) rotate(3deg); }
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%     { transform: translateY(-12px) rotate(3deg); }
 }
-
-.home-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
+.home-brand { display:flex; flex-direction:column; align-items:center; gap:6px; }
 .home-title {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 1000;
-  font-size: clamp(2.4rem, 8vw, 6rem);
-  color: var(--ginger);
-  letter-spacing: -1px;
-  line-height: 1;
+  font-weight: 1000; font-size: clamp(2.4rem,8vw,6rem);
+  color: var(--ginger); letter-spacing: -1px; line-height: 1;
 }
 .home-title span { color: var(--ginger-dk); }
 .home-tagline {
-  font-size: clamp(0.8rem, 2vw, 1.1rem);
-  font-weight: 700;
-  color: var(--muted);
-  letter-spacing: 3px;
-  text-transform: uppercase;
+  font-size: clamp(0.8rem,2vw,1.1rem); font-weight: 700;
+  color: var(--muted); letter-spacing: 3px; text-transform: uppercase;
 }
 
-/* Play button */
 .play-btn {
-  width: clamp(90px, 16vw, 160px);
-  height: clamp(90px, 16vw, 160px);
-  border-radius: 50%;
-  border: none;
-  background: var(--ginger);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: clamp(90px,16vw,150px); height: clamp(90px,16vw,150px);
+  border-radius: 50%; border: none; background: var(--ginger);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 6px 0 var(--ginger-dk), 0 10px 40px rgba(232,98,26,0.35);
   transition: transform 0.1s, box-shadow 0.1s;
-  position: relative;
-  overflow: hidden;
 }
-.play-btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 var(--ginger-dk), 0 14px 48px rgba(232,98,26,0.4); }
-.play-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--ginger-dk), 0 6px 24px rgba(232,98,26,0.3); }
+.play-btn:hover  { transform: translateY(-3px); box-shadow: 0 9px 0 var(--ginger-dk), 0 14px 48px rgba(232,98,26,0.4); }
+.play-btn:active { transform: translateY(3px);  box-shadow: 0 3px 0 var(--ginger-dk), 0 6px 24px rgba(232,98,26,0.3); }
 .play-btn svg { width: 42%; height: 42%; fill: white; margin-left: 8%; }
 
 .tap-hint {
-  font-size: clamp(0.8rem, 1.5vw, 1rem);
-  font-weight: 700;
-  color: var(--muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-size: clamp(0.8rem,1.5vw,1rem); font-weight: 700;
+  color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
 }
 
-/* =====================
-   LEVEL SELECT
-===================== */
-#level-screen {
-  /* picsum seed "field" — open green field, bright and airy */
-  background: var(--cream) url('https://picsum.photos/seed/field/1920/1080') center/cover no-repeat;
-  position: relative;
+#install-app-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: clamp(10px,1.5vh,14px) clamp(18px,3vw,28px);
+  border-radius: 14px; border: 2px solid rgba(232,98,26,0.25);
+  background: rgba(232,98,26,0.06); color: var(--ginger-dk);
+  font-weight: 800; font-size: clamp(0.78rem,1.6vw,0.95rem);
+  cursor: pointer; letter-spacing: 0.3px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
 }
-#level-screen::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,248,240,0.88);
-  pointer-events: none;
-  z-index: 0;
-}
-#level-screen > * { position: relative; z-index: 1; }
+#install-app-btn:hover  { background: rgba(232,98,26,0.12); border-color: rgba(232,98,26,0.4); transform: translateY(-1px); }
+#install-app-btn:active { transform: translateY(0); }
+#install-app-btn svg { width: 18px; height: 18px; fill: var(--ginger-dk); }
+#install-app-btn.hidden { display: none; }
 
-.level-header {
+/* ── INSTALL SCREEN ── */
+#install-screen { background: var(--cream); }
+
+.install-header {
+  flex-shrink: 0; display: flex; align-items: center;
+  padding: clamp(12px,2vh,20px) clamp(16px,3vw,28px);
+  background: white; border-bottom: 2px solid var(--border); gap: 14px;
+}
+.install-header-title {
+  font-weight: 900; font-size: clamp(1.1rem,3vw,1.8rem);
+  color: var(--text); flex: 1; text-align: center;
+}
+.install-header .spacer { width: clamp(40px,6vw,52px); flex-shrink: 0; }
+
+.install-body {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: clamp(24px,4vh,48px) clamp(20px,5vw,60px);
+  gap: clamp(16px,3vh,28px);
+  scrollbar-width: thin;
+}
+
+.install-platform-icon { font-size: clamp(3rem,9vw,6rem); line-height: 1; }
+
+.install-intro { text-align: center; }
+.install-intro h2 {
+  font-weight: 900; font-size: clamp(1.2rem,3.5vw,1.8rem);
+  color: var(--text); margin-bottom: 8px;
+}
+.install-intro p {
+  font-size: clamp(0.85rem,2vw,1rem); color: var(--muted);
+  font-weight: 700; line-height: 1.5; max-width: 480px;
+}
+
+#native-install-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: clamp(14px,2vh,20px) clamp(28px,5vw,48px);
+  border-radius: 18px; border: none;
+  background: var(--ginger); color: white;
+  font-weight: 900; font-size: clamp(1rem,2.5vw,1.3rem);
+  cursor: pointer; font-family: 'Nunito', sans-serif;
+  box-shadow: 0 5px 0 var(--ginger-dk), 0 8px 30px rgba(232,98,26,0.35);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+#native-install-btn:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ginger-dk), 0 12px 40px rgba(232,98,26,0.4); }
+#native-install-btn:active { transform: translateY(2px);  box-shadow: 0 3px 0 var(--ginger-dk); }
+#native-install-btn.hidden { display: none; }
+
+.install-steps-card {
+  background: white; border: 2px solid var(--border);
+  border-radius: clamp(18px,3vw,28px); box-shadow: 0 4px 0 var(--border);
+  padding: clamp(20px,3.5vw,36px); width: 100%; max-width: 520px;
+}
+.install-steps-title {
+  font-weight: 900; font-size: clamp(0.7rem,1.5vw,0.9rem);
+  color: var(--muted); letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: clamp(14px,2vh,20px);
+}
+.install-steps { display: flex; flex-direction: column; gap: clamp(12px,2vh,16px); }
+.install-step  { display: flex; align-items: flex-start; gap: clamp(12px,2vw,16px); }
+.step-num {
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  padding: clamp(12px, 2vh, 20px) clamp(16px, 3vw, 28px);
-  background: white;
-  border-bottom: 2px solid var(--border);
-  gap: 14px;
-}
-.icon-btn {
-  width: clamp(40px, 6vw, 52px);
-  height: clamp(40px, 6vw, 52px);
-  border-radius: 14px;
-  border: 2px solid var(--border);
-  background: white;
-  cursor: pointer;
+  width: clamp(28px,4vw,36px); height: clamp(28px,4vw,36px);
+  border-radius: 50%; background: var(--ginger); color: white;
+  font-weight: 900; font-size: clamp(0.75rem,1.5vw,0.95rem);
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: background 0.15s, transform 0.1s;
-  color: var(--text);
+  box-shadow: 0 2px 0 var(--ginger-dk);
 }
-.icon-btn:hover { background: #f0f0f0; transform: scale(1.05); }
+.step-text {
+  padding-top: clamp(3px,0.5vh,7px);
+  font-size: clamp(0.85rem,1.9vw,1rem); font-weight: 700;
+  color: var(--text); line-height: 1.45;
+}
+.step-text em {
+  font-style: normal; background: #f0ebe4;
+  padding: 1px 7px; border-radius: 6px;
+  font-weight: 900; color: var(--ginger-dk); white-space: nowrap;
+}
+.step-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; background: #f0ebe4; border-radius: 6px;
+  vertical-align: middle; margin: 0 2px; font-size: 13px; font-style: normal;
+}
+
+.install-already {
+  font-size: clamp(0.8rem,1.6vw,0.95rem); color: var(--green);
+  font-weight: 800; text-align: center;
+  background: rgba(24,184,112,0.08); border: 2px solid rgba(24,184,112,0.2);
+  border-radius: 14px; padding: 12px 20px;
+}
+
+/* ── SHARED ICON BTN ── */
+.icon-btn {
+  width: clamp(40px,6vw,52px); height: clamp(40px,6vw,52px);
+  border-radius: 14px; border: 2px solid var(--border);
+  background: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background 0.15s, transform 0.1s;
+}
+.icon-btn:hover  { background: #f0f0f0; transform: scale(1.05); }
 .icon-btn:active { transform: scale(0.95); }
 .icon-btn svg { width: 52%; height: 52%; fill: var(--text); }
 
+/* ── LEVEL SELECT ── */
+#level-screen { background: var(--cream); }
+.level-header {
+  flex-shrink: 0; display: flex; align-items: center;
+  padding: clamp(12px,2vh,20px) clamp(16px,3vw,28px);
+  background: white; border-bottom: 2px solid var(--border); gap: 14px;
+}
 .level-header-title {
-  font-weight: 900;
-  font-size: clamp(1.1rem, 3vw, 1.8rem);
-  color: var(--text);
-  flex: 1;
-  text-align: center;
+  font-weight: 900; font-size: clamp(1.1rem,3vw,1.8rem);
+  color: var(--text); flex: 1; text-align: center;
 }
-/* spacer to center title */
-.level-header .spacer { width: clamp(40px, 6vw, 52px); flex-shrink: 0; }
-
+.level-header .spacer { width: clamp(40px,6vw,52px); flex-shrink: 0; }
 .level-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: clamp(16px, 2.5vw, 28px);
-  scrollbar-width: thin;
-  scrollbar-color: var(--ginger) transparent;
+  flex: 1; overflow-y: auto;
+  padding: clamp(16px,2.5vw,28px);
+  scrollbar-width: thin; scrollbar-color: var(--ginger) transparent;
 }
-
 .level-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(12px, 2vw, 20px);
-  max-width: 800px;
-  margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: clamp(12px,2vw,20px); max-width: 800px; margin: 0 auto;
 }
-
-/* Level cards */
 .level-card {
-  aspect-ratio: 1;
-  border-radius: clamp(18px, 2.5vw, 28px);
+  aspect-ratio: 1; border-radius: clamp(18px,2.5vw,28px);
   border: 3px solid transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(4px, 1vh, 10px);
-  padding: 10px;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.12s, box-shadow 0.12s;
-  cursor: pointer;
-  background-size: cover;
-  background-position: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(4px,1vh,10px); padding: 10px;
+  position: relative; overflow: hidden;
+  transition: transform 0.12s, box-shadow 0.12s; cursor: pointer;
 }
-/* photo sits behind a strong color overlay */
-.level-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  z-index: 0;
-}
-.level-card > * { position: relative; z-index: 1; }
-
-.level-card.unlocked {
-  box-shadow: 0 4px 0 rgba(0,0,0,0.12);
-}
+.level-card.unlocked { box-shadow: 0 4px 0 rgba(0,0,0,0.12); }
 .level-card.unlocked:hover  { transform: translateY(-4px); box-shadow: 0 10px 0 rgba(0,0,0,0.1); }
 .level-card.unlocked:active { transform: translateY(2px);  box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
-.level-card.locked {
-  cursor: not-allowed;
-  opacity: 0.45;
-  filter: grayscale(0.5);
-  box-shadow: none;
-}
+.level-card.locked { cursor: not-allowed; opacity: 0.45; filter: grayscale(0.5); box-shadow: none; }
+.lc-icon  { font-size: clamp(1.8rem,5vw,3.8rem); line-height: 1; }
+.lc-num   { font-weight: 900; font-size: clamp(0.75rem,2vw,1.3rem); color: white; line-height: 1; }
+.lc-name  { font-weight: 800; font-size: clamp(0.5rem,1.2vw,0.8rem); color: rgba(255,255,255,0.88); text-align: center; }
+.lock-icon { position: absolute; bottom: 8px; right: 10px; font-size: clamp(0.9rem,2vw,1.4rem); opacity: 0.7; }
+.lc-t1{background:#2d7ef5;border-color:#1a5cbf} .lc-t2{background:#e8621a;border-color:#b84c10}
+.lc-t3{background:#18b870;border-color:#0e8a52} .lc-t4{background:#f02a4a;border-color:#b51e38}
+.lc-t5{background:#7c44f0;border-color:#5a2fc0} .lc-t6{background:#f5c518;border-color:#c29a00}
+.lc-t7{background:#00bcd4;border-color:#0090a8} .lc-t8{background:#ff6f61;border-color:#cc4a3d}
+.lc-t9{background:#43a047;border-color:#2d6e30}
 
-.lc-icon  { font-size: clamp(1.8rem, 5vw, 3.8rem); line-height: 1; }
-.lc-num   { font-weight: 900; font-size: clamp(0.75rem, 2vw, 1.3rem); color: white; line-height: 1; }
-.lc-name  { font-weight: 800; font-size: clamp(0.5rem, 1.2vw, 0.8rem); color: rgba(255,255,255,0.88); text-align: center; }
-.lock-icon { position: absolute; bottom: 8px; right: 10px; font-size: clamp(0.9rem, 2vw, 1.4rem); opacity: 0.7; }
-
-/* Card colour themes — solid color as ::before overlay over photo */
-.lc-t1 { border-color: #1a5cbf; } .lc-t1::before { background: rgba(45,126,245,0.78); }
-.lc-t2 { border-color: #b84c10; } .lc-t2::before { background: rgba(232,98,26,0.78); }
-.lc-t3 { border-color: #0e8a52; } .lc-t3::before { background: rgba(24,184,112,0.78); }
-.lc-t4 { border-color: #b51e38; } .lc-t4::before { background: rgba(240,42,74,0.78); }
-.lc-t5 { border-color: #5a2fc0; } .lc-t5::before { background: rgba(124,68,240,0.78); }
-.lc-t6 { border-color: #c29a00; } .lc-t6::before { background: rgba(245,197,24,0.82); }
-.lc-t7 { border-color: #0090a8; } .lc-t7::before { background: rgba(0,188,212,0.78); }
-.lc-t8 { border-color: #cc4a3d; } .lc-t8::before { background: rgba(255,111,97,0.78); }
-.lc-t9 { border-color: #2d6e30; } .lc-t9::before { background: rgba(67,160,71,0.78); }
-
-/* =====================
-   GAME SCREEN
-===================== */
-#game-screen {
-  /* picsum seed "mountain" — bright mountain landscape, energising */
-  background: var(--cream) url('https://picsum.photos/seed/mountain/1920/1080') center/cover no-repeat;
-  position: relative;
-}
-#game-screen::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,248,240,0.86);
-  pointer-events: none;
-  z-index: 0;
-}
-#game-screen > * { position: relative; z-index: 1; }
-
-/* TOP BAR — fixed height, no layout shift */
+/* ── GAME SCREEN ── */
+#game-screen { background: var(--cream); }
 .game-topbar {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  padding: clamp(10px, 1.8vh, 18px) clamp(12px, 2vw, 22px);
-  background: white;
-  border-bottom: 2px solid var(--border);
-  gap: 12px;
-  height: clamp(64px, 10vh, 90px);
+  flex-shrink: 0; display: flex; align-items: center;
+  padding: clamp(10px,1.8vh,18px) clamp(12px,2vw,22px);
+  background: white; border-bottom: 2px solid var(--border);
+  gap: 12px; height: clamp(64px,10vh,90px);
 }
-
-/* Left: home button — fixed width */
-.topbar-left {
-  flex: 0 0 clamp(40px, 6vw, 52px);
-}
-
-/* Center: level + progress — fixed, no reflow */
+.topbar-left { flex: 0 0 clamp(40px,6vw,52px); }
 .topbar-center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  overflow: hidden;
-  min-width: 0;
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; overflow: hidden; min-width: 0;
 }
 .tc-level {
-  font-weight: 900;
-  font-size: clamp(0.65rem, 1.4vw, 0.9rem);
-  color: var(--muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  font-weight: 900; font-size: clamp(0.65rem,1.4vw,0.9rem); color: var(--muted);
+  letter-spacing: 2px; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
-.tc-progress {
-  font-weight: 900;
-  font-size: clamp(0.85rem, 1.8vw, 1.15rem);
-  color: var(--text);
-  white-space: nowrap;
-}
-
-/* Pip bar — fixed height, won't jump */
+.tc-progress { font-weight: 900; font-size: clamp(0.85rem,1.8vw,1.15rem); color: var(--text); white-space: nowrap; }
 .pip-row {
-  display: flex;
-  align-items: center;
-  gap: clamp(3px, 0.6vw, 6px);
-  height: 14px;     /* fixed height so it doesn't shift */
-  flex-wrap: nowrap;
-  overflow: hidden;
+  display: flex; align-items: center; gap: clamp(3px,0.6vw,6px);
+  height: 14px; flex-wrap: nowrap; overflow: hidden;
 }
 .pip {
-  width: clamp(8px, 1.2vw, 12px);
-  height: clamp(8px, 1.2vw, 12px);
-  border-radius: 50%;
-  background: #e0ddd8;
-  flex-shrink: 0;
+  width: clamp(8px,1.2vw,12px); height: clamp(8px,1.2vw,12px);
+  border-radius: 50%; background: #e0ddd8; flex-shrink: 0;
   transition: background 0.25s, transform 0.25s;
 }
 .pip.done    { background: var(--green); transform: scale(1.05); }
 .pip.current { background: var(--ginger); transform: scale(1.15); }
-
-/* Right: timer — fixed width, won't shift layout */
 .topbar-right {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #f0ebe4;
-  border-radius: 12px;
-  padding: clamp(6px, 1vw, 10px) clamp(10px, 1.6vw, 16px);
-  /* Fixed min-width so changing digits don't resize it */
-  min-width: clamp(72px, 10vw, 110px);
-  justify-content: center;
+  flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
+  background: #f0ebe4; border-radius: 12px;
+  padding: clamp(6px,1vw,10px) clamp(10px,1.6vw,16px);
+  min-width: clamp(72px,10vw,110px); justify-content: center;
 }
-.timer-icon { font-size: clamp(0.85rem, 1.5vw, 1.1rem); }
+.timer-icon { font-size: clamp(0.85rem,1.5vw,1.1rem); }
 #timer-display {
-  font-weight: 900;
-  font-size: clamp(0.9rem, 2vw, 1.3rem);
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
-  letter-spacing: 1px;
-  /* Monospace numbers — won't shift */
-  font-family: 'Nunito', monospace;
-  min-width: 3.5ch;
-  text-align: right;
+  font-weight: 900; font-size: clamp(0.9rem,2vw,1.3rem); color: var(--text);
+  font-variant-numeric: tabular-nums; font-feature-settings: "tnum";
+  letter-spacing: 1px; min-width: 3.5ch; text-align: right;
 }
-
-/* GAME AREA */
 .game-area {
-  flex: 1;
-  display: flex;
-  align-items: stretch;
-  gap: clamp(14px, 3vw, 40px);
-  padding: clamp(16px, 3vh, 36px) clamp(16px, 4vw, 48px);
+  flex: 1; display: flex; align-items: stretch;
+  gap: clamp(14px,3vw,40px); padding: clamp(16px,3vh,36px) clamp(16px,4vw,48px);
   overflow: hidden;
 }
-
-/* PROBLEM SIDE */
 .problem-side {
-  flex: 1.3;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;       /* panel stays left */
-  gap: 0;
-  background: white;
-  border-radius: clamp(18px, 2.5vw, 30px);
-  border: 3px solid var(--border);
-  padding: clamp(20px, 4vw, 48px);
+  flex: 1.3; display: flex; flex-direction: column;
+  justify-content: center; align-items: flex-start; gap: 0;
+  background: white; border-radius: clamp(18px,2.5vw,30px);
+  border: 3px solid var(--border); padding: clamp(20px,4vw,48px);
   box-shadow: 0 4px 0 var(--border);
 }
-
-/* Inner column: right-aligned so both rows line up on their right edge */
-.prob-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: clamp(2px, 0.8vh, 8px);
-}
-
-/* Shared number size for both rows */
+.prob-stack { display: flex; flex-direction: column; align-items: flex-end; gap: clamp(2px,0.8vh,8px); }
 .prob-num1 {
-  font-weight: 1000;
-  font-size: clamp(3.5rem, 11vw, 9rem);
-  color: var(--text);
-  line-height: 1.05;
-  letter-spacing: -3px;
-  font-variant-numeric: tabular-nums;
+  font-weight: 1000; font-size: clamp(3.5rem,11vw,9rem); color: var(--text);
+  line-height: 1.05; letter-spacing: -3px; font-variant-numeric: tabular-nums;
 }
-
-.prob-row {
-  display: flex;
-  align-items: center;
-  gap: clamp(6px, 1.5vw, 16px);
-}
-.prob-op {
-  font-weight: 900;
-  font-size: clamp(1.8rem, 5vw, 4.5rem);
-  line-height: 1.05;
-  color: var(--ginger);
-  letter-spacing: -1px;
-  align-self: center;
+.prob-row { display: flex; align-items: center; gap: clamp(6px,1.5vw,16px); }
+.prob-op  {
+  font-weight: 900; font-size: clamp(1.8rem,5vw,4.5rem);
+  line-height: 1.05; color: var(--ginger); letter-spacing: -1px; align-self: center;
 }
 .prob-num2 {
-  font-weight: 1000;
-  font-size: clamp(3.5rem, 11vw, 9rem);
-  color: var(--blue);
-  line-height: 1.05;
-  letter-spacing: -3px;
-  font-variant-numeric: tabular-nums;
+  font-weight: 1000; font-size: clamp(3.5rem,11vw,9rem); color: var(--blue);
+  line-height: 1.05; letter-spacing: -3px; font-variant-numeric: tabular-nums;
 }
-
-/* Divider line sits BELOW the bottom row */
-.prob-divider {
-  width: 100%;
-  height: 4px;
-  background: #d0ccc6;
-  border-radius: 2px;
-  margin-top: clamp(4px, 1vh, 10px);
-}
-
-/* unused but kept for safety */
-.prob-eq   { display: none; }
-.prob-blank { display: none; }
-
-/* CHOICES SIDE */
-.choices-side {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: clamp(10px, 2vh, 20px);
-}
-
+.prob-divider { width: 100%; height: 4px; background: #d0ccc6; border-radius: 2px; margin-top: clamp(4px,1vh,10px); }
+.choices-side { flex: 1; display: flex; flex-direction: column; gap: clamp(10px,2vh,20px); }
 .choice-btn {
-  flex: 1;
-  max-height: clamp(80px, 20vh, 170px);
-  border-radius: clamp(14px, 2vw, 24px);
-  border: 3px solid transparent;
-  cursor: pointer;
-  font-weight: 1000;
-  font-size: clamp(2rem, 5.5vw, 5rem);
-  color: white;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -1px;
+  flex: 1; border-radius: clamp(14px,2vw,24px); border: 3px solid transparent;
+  cursor: pointer; font-weight: 1000; font-size: clamp(2rem,5.5vw,5rem);
+  color: white; font-variant-numeric: tabular-nums; letter-spacing: -1px;
+  font-family: 'Nunito', sans-serif;
   transition: transform 0.1s, box-shadow 0.1s;
-  position: relative;
 }
-.choice-btn:hover:not(:disabled) { transform: translateY(-3px); }
+.choice-btn:hover:not(:disabled)  { transform: translateY(-3px); }
 .choice-btn:active:not(:disabled) { transform: translateY(2px); }
 .choice-btn:disabled { cursor: default; }
+.choice-btn:nth-child(1){background:#2d7ef5;box-shadow:0 5px 0 #1a5cbf}
+.choice-btn:nth-child(2){background:#e8621a;box-shadow:0 5px 0 #b84c10}
+.choice-btn:nth-child(3){background:#7c44f0;box-shadow:0 5px 0 #5a2fc0}
+.choice-btn:nth-child(1):hover:not(:disabled){box-shadow:0 8px 0 #1a5cbf}
+.choice-btn:nth-child(2):hover:not(:disabled){box-shadow:0 8px 0 #b84c10}
+.choice-btn:nth-child(3):hover:not(:disabled){box-shadow:0 8px 0 #5a2fc0}
+.choice-btn:nth-child(1):active:not(:disabled){box-shadow:0 2px 0 #1a5cbf}
+.choice-btn:nth-child(2):active:not(:disabled){box-shadow:0 2px 0 #b84c10}
+.choice-btn:nth-child(3):active:not(:disabled){box-shadow:0 2px 0 #5a2fc0}
+.choice-btn.state-correct{background:var(--green)!important;border-color:#0e8a52!important;box-shadow:0 5px 0 #0e8a52!important;animation:correctPop 0.4s ease}
+.choice-btn.state-wrong  {background:var(--red)!important;border-color:#aa1a2e!important;box-shadow:0 5px 0 #aa1a2e!important;animation:wrongShake 0.42s ease}
+@keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.12)}70%{transform:scale(0.97)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 
-.choice-btn:nth-child(1) {
-  background: #2d7ef5;
-  box-shadow: 0 5px 0 #1a5cbf;
-}
-.choice-btn:nth-child(2) {
-  background: #e8621a;
-  box-shadow: 0 5px 0 #b84c10;
-}
-.choice-btn:nth-child(3) {
-  background: #7c44f0;
-  box-shadow: 0 5px 0 #5a2fc0;
-}
-.choice-btn:nth-child(1):hover:not(:disabled) { box-shadow: 0 8px 0 #1a5cbf; }
-.choice-btn:nth-child(2):hover:not(:disabled) { box-shadow: 0 8px 0 #b84c10; }
-.choice-btn:nth-child(3):hover:not(:disabled) { box-shadow: 0 8px 0 #5a2fc0; }
-.choice-btn:nth-child(1):active:not(:disabled) { box-shadow: 0 2px 0 #1a5cbf; }
-.choice-btn:nth-child(2):active:not(:disabled) { box-shadow: 0 2px 0 #b84c10; }
-.choice-btn:nth-child(3):active:not(:disabled) { box-shadow: 0 2px 0 #5a2fc0; }
-
-/* Correct / Wrong feedback */
-.choice-btn.state-correct {
-  background: var(--green) !important;
-  border-color: #0e8a52 !important;
-  box-shadow: 0 5px 0 #0e8a52 !important;
-  animation: correctPop 0.4s ease;
-}
-.choice-btn.state-wrong {
-  background: var(--red) !important;
-  border-color: #aa1a2e !important;
-  box-shadow: 0 5px 0 #aa1a2e !important;
-  animation: wrongShake 0.42s ease;
-}
-@keyframes correctPop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.12); }
-  70%  { transform: scale(0.97); }
-  100% { transform: scale(1); }
-}
-@keyframes wrongShake {
-  0%,100% { transform: translateX(0); }
-  20%     { transform: translateX(-10px); }
-  40%     { transform: translateX(10px); }
-  60%     { transform: translateX(-6px); }
-  80%     { transform: translateX(6px); }
-}
-
-/* =====================
-   COMPLETE SCREEN
-===================== */
-#complete-screen {
-  /* picsum seed "sunshine" — golden sunshine bursting through clouds */
-  background: var(--cream) url('https://picsum.photos/seed/sunshine/1920/1080') center/cover no-repeat;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-#complete-screen::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,248,240,0.82);
-  pointer-events: none;
-  z-index: 0;
-}
-#complete-screen > * { position: relative; z-index: 1; }
+/* ── COMPLETE ── */
+#complete-screen { background: var(--cream); align-items: center; justify-content: center; }
 .complete-card {
-  background: white;
-  border-radius: clamp(24px, 4vw, 40px);
-  border: 3px solid var(--border);
-  box-shadow: 0 8px 0 var(--border);
-  padding: clamp(28px, 5vw, 60px);
-  max-width: min(90vw, 500px);
-  width: 100%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(14px, 2.5vh, 28px);
+  background: white; border-radius: clamp(24px,4vw,40px);
+  border: 3px solid var(--border); box-shadow: 0 8px 0 var(--border);
+  padding: clamp(28px,5vw,60px); max-width: min(90vw,500px); width: 100%;
+  text-align: center; display: flex; flex-direction: column; align-items: center;
+  gap: clamp(14px,2.5vh,28px);
 }
-.complete-trophy { font-size: clamp(4rem, 12vw, 8rem); animation: mascotBob 2.5s ease-in-out infinite; }
-.complete-title {
-  font-weight: 1000;
-  font-size: clamp(2rem, 7vw, 4.5rem);
-  color: var(--ginger);
-  letter-spacing: -1px;
-  line-height: 1;
-}
-.complete-sub {
-  font-weight: 700;
-  font-size: clamp(0.85rem, 2vw, 1.1rem);
-  color: var(--muted);
-  letter-spacing: 1px;
-}
-.complete-stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: #fff8f0;
-  border: 2px solid rgba(232,98,26,0.2);
-  border-radius: 16px;
-  padding: clamp(10px, 1.5vh, 16px) clamp(20px, 3vw, 32px);
-}
-.complete-stat-icon { font-size: clamp(1.1rem, 2.5vw, 1.6rem); }
-.complete-stat-val {
-  font-weight: 900;
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  color: var(--ginger);
-  font-variant-numeric: tabular-nums;
-}
-.complete-btns {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  flex-wrap: wrap;
-}
-.comp-btn {
-  flex: 1;
-  min-width: clamp(110px, 24vw, 190px);
-  padding: clamp(12px, 2vh, 18px);
-  border-radius: 16px;
-  border: none;
-  cursor: pointer;
-  font-weight: 900;
-  font-size: clamp(0.9rem, 2vw, 1.2rem);
-  letter-spacing: 0.3px;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-.comp-btn:hover { transform: translateY(-2px); }
+.complete-trophy { font-size: clamp(4rem,12vw,8rem); animation: mascotBob 2.5s ease-in-out infinite; }
+.complete-title  { font-weight: 1000; font-size: clamp(2rem,7vw,4.5rem); color: var(--ginger); letter-spacing: -1px; line-height: 1; }
+.complete-sub    { font-weight: 700; font-size: clamp(0.85rem,2vw,1.1rem); color: var(--muted); }
+.complete-stat   { display: inline-flex; align-items: center; gap: 10px; background: #fff8f0; border: 2px solid rgba(232,98,26,0.2); border-radius: 16px; padding: clamp(10px,1.5vh,16px) clamp(20px,3vw,32px); }
+.complete-stat-icon { font-size: clamp(1.1rem,2.5vw,1.6rem); }
+.complete-stat-val  { font-weight: 900; font-size: clamp(1.2rem,3vw,2rem); color: var(--ginger); font-variant-numeric: tabular-nums; }
+.complete-btns  { display: flex; gap: 12px; width: 100%; flex-wrap: wrap; }
+.comp-btn { flex: 1; min-width: clamp(110px,24vw,190px); padding: clamp(12px,2vh,18px); border-radius: 16px; border: none; cursor: pointer; font-weight: 900; font-size: clamp(0.9rem,2vw,1.2rem); font-family: 'Nunito',sans-serif; transition: transform 0.1s; }
+.comp-btn:hover  { transform: translateY(-2px); }
 .comp-btn:active { transform: translateY(1px); }
-.comp-btn.again {
-  background: var(--ginger);
-  color: white;
-  box-shadow: 0 4px 0 var(--ginger-dk);
-}
-.comp-btn.menu {
-  background: #f0ebe4;
-  color: var(--text);
-  box-shadow: 0 4px 0 #d8cfc6;
-}
+.comp-btn.again { background: var(--ginger); color: white; box-shadow: 0 4px 0 var(--ginger-dk); }
+.comp-btn.menu  { background: #f0ebe4; color: var(--text); box-shadow: 0 4px 0 #d8cfc6; }
 
-/* =====================
-   ABANDON MODAL
-===================== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(26,26,46,0.55);
-  backdrop-filter: blur(6px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 500;
-}
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,26,46,0.55); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 500; }
 .modal-overlay.active { display: flex; }
-.modal-box {
-  background: white;
-  border-radius: 28px;
-  border: 3px solid var(--border);
-  box-shadow: 0 8px 0 rgba(0,0,0,0.1);
-  padding: clamp(28px, 5vw, 52px);
-  max-width: min(90vw, 420px);
-  width: 100%;
-  text-align: center;
-  animation: modalIn 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.92) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.modal-emoji { font-size: clamp(2.5rem, 6vw, 4rem); }
-.modal-title {
-  font-weight: 900;
-  font-size: clamp(1.3rem, 3.5vw, 2rem);
-  color: var(--text);
-  margin-top: 4px;
-}
-.modal-text {
-  font-size: clamp(0.82rem, 1.8vw, 1rem);
-  color: var(--muted);
-  line-height: 1.55;
-  margin-bottom: 8px;
-}
-.modal-btns { display: flex; gap: 12px; width: 100%; }
-.modal-btn {
-  flex: 1;
-  padding: clamp(12px, 2vh, 16px);
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  font-weight: 900;
-  font-size: clamp(0.88rem, 2vw, 1.1rem);
-  transition: transform 0.1s;
-}
+.modal-box { background: white; border-radius: 28px; border: 3px solid var(--border); box-shadow: 0 8px 0 rgba(0,0,0,0.1); padding: clamp(28px,5vw,52px); max-width: min(90vw,420px); width: 100%; text-align: center; animation: modalIn 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+@keyframes modalIn { from{opacity:0;transform:scale(0.92) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.modal-emoji { font-size: clamp(2.5rem,6vw,4rem); }
+.modal-title { font-weight: 900; font-size: clamp(1.3rem,3.5vw,2rem); color: var(--text); margin-top: 4px; }
+.modal-text  { font-size: clamp(0.82rem,1.8vw,1rem); color: var(--muted); line-height: 1.55; margin-bottom: 8px; }
+.modal-btns  { display: flex; gap: 12px; width: 100%; }
+.modal-btn   { flex: 1; padding: clamp(12px,2vh,16px); border-radius: 14px; border: none; cursor: pointer; font-weight: 900; font-family: 'Nunito',sans-serif; font-size: clamp(0.88rem,2vw,1.1rem); transition: transform 0.1s; }
 .modal-btn:hover  { transform: scale(1.03); }
 .modal-btn:active { transform: scale(0.97); }
-.modal-btn.keep {
-  background: #f0ebe4;
-  color: var(--text);
-  box-shadow: 0 3px 0 #d8cfc6;
-}
-.modal-btn.quit {
-  background: var(--red);
-  color: white;
-  box-shadow: 0 3px 0 #aa1a2e;
-}
+.modal-btn.keep { background: #f0ebe4; color: var(--text); box-shadow: 0 3px 0 #d8cfc6; }
+.modal-btn.quit { background: var(--red); color: white; box-shadow: 0 3px 0 #aa1a2e; }
 
-/* =====================
-   CONFETTI
-===================== */
-#confetti-canvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 999;
-}
+/* ── CONFETTI ── */
+#confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
 
 </style>
 </head>
 <body>
 
-<!-- ======== HOME ======== -->
+<!-- HOME -->
 <div id="home-screen" class="screen active">
   <div class="home-topbar">
-    <a class="back-link" href="https://sadie.deweese.dev/">
+    <a class="back-link" href="https://learn.deweese.dev/">
       <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-      sadie.deweese.dev
+      learn.deweese.dev
     </a>
   </div>
   <div class="home-mascot" aria-hidden="true">🍪</div>
@@ -733,12 +418,45 @@ html, body {
     <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
   </button>
   <div class="tap-hint">Tap to Play</div>
+  <button id="install-app-btn" class="hidden">
+    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    Install as an App
+  </button>
 </div>
 
-<!-- ======== LEVEL SELECT ======== -->
+<!-- INSTALL SCREEN -->
+<div id="install-screen" class="screen">
+  <div class="install-header">
+    <button class="icon-btn" id="install-back-btn" aria-label="Back">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </button>
+    <div class="install-header-title">Install as an App</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="install-body">
+    <div class="install-platform-icon" id="install-platform-icon">📱</div>
+    <div class="install-intro">
+      <h2 id="install-heading">Add to your Home Screen</h2>
+      <p id="install-subtext">Install Smart GingerSnaps as an app so it's always easy to find — and works offline.</p>
+    </div>
+    <button id="native-install-btn" class="hidden">
+      <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:white;flex-shrink:0"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      Install Now
+    </button>
+    <div class="install-steps-card">
+      <div class="install-steps-title">Step by step</div>
+      <div class="install-steps" id="install-steps"></div>
+    </div>
+    <div class="install-already hidden" id="install-already">
+      ✅ Smart GingerSnaps is already installed on this device!
+    </div>
+  </div>
+</div>
+
+<!-- LEVEL SELECT -->
 <div id="level-screen" class="screen">
   <div class="level-header">
-    <button class="icon-btn" id="back-to-home-btn" aria-label="Back to home">
+    <button class="icon-btn" id="back-to-home-btn" aria-label="Back">
       <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
     </button>
     <div class="level-header-title">Pick a Level</div>
@@ -749,31 +467,24 @@ html, body {
   </div>
 </div>
 
-<!-- ======== GAME ======== -->
+<!-- GAME -->
 <div id="game-screen" class="screen">
-
   <div class="game-topbar">
-    <!-- Fixed-width left zone -->
     <div class="topbar-left">
-      <button class="icon-btn" id="home-icon-btn" aria-label="Go home">
+      <button class="icon-btn" id="home-icon-btn" aria-label="Home">
         <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       </button>
     </div>
-
-    <!-- Center zone — fixed, no reflow -->
     <div class="topbar-center">
-      <div class="tc-level" id="tc-level">Level 1 — +1 Addition</div>
+      <div class="tc-level"    id="tc-level">Level 1</div>
       <div class="tc-progress" id="tc-progress">Problem 1 of 10</div>
-      <div class="pip-row" id="pip-row"></div>
+      <div class="pip-row"     id="pip-row"></div>
     </div>
-
-    <!-- Fixed-width right zone -->
     <div class="topbar-right">
       <span class="timer-icon" aria-hidden="true">⏱</span>
       <span id="timer-display">0:00</span>
     </div>
   </div>
-
   <div class="game-area">
     <div class="problem-side" id="problem-side">
       <div class="prob-stack">
@@ -785,17 +496,15 @@ html, body {
         <div class="prob-divider"></div>
       </div>
     </div>
-
     <div class="choices-side" id="choices-side">
-      <button class="choice-btn" data-idx="0"></button>
-      <button class="choice-btn" data-idx="1"></button>
-      <button class="choice-btn" data-idx="2"></button>
+      <button class="choice-btn"></button>
+      <button class="choice-btn"></button>
+      <button class="choice-btn"></button>
     </div>
   </div>
-
 </div>
 
-<!-- ======== COMPLETE ======== -->
+<!-- COMPLETE -->
 <div id="complete-screen" class="screen">
   <div class="complete-card">
     <div class="complete-trophy">🏆</div>
@@ -812,7 +521,7 @@ html, body {
   </div>
 </div>
 
-<!-- ======== ABANDON MODAL ======== -->
+<!-- ABANDON MODAL -->
 <div class="modal-overlay" id="abandon-modal">
   <div class="modal-box">
     <div class="modal-emoji">🏠</div>
@@ -828,397 +537,353 @@ html, body {
 <canvas id="confetti-canvas"></canvas>
 
 <script>
-/* =====================
-   LEVELS DATA
-===================== */
+/* ── PWA SERVICE WORKER ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+/* ── PLATFORM DETECTION ── */
+function detectPlatform() {
+  const ua = navigator.userAgent;
+  if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
+  if (/android/i.test(ua)) return 'android';
+  if (/windows/i.test(ua)) return 'windows';
+  if (/macintosh|mac os x/i.test(ua)) return 'mac';
+  return 'desktop';
+}
+function isStandalone() {
+  return window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+}
+
+const PLATFORM = detectPlatform();
+
+const INSTALL_CONTENT = {
+  ios: {
+    icon: '🍎',
+    heading: 'Add to iPhone / iPad Home Screen',
+    subtext: 'Smart GingerSnaps works like a real app on iOS — tap an icon, no browser needed.',
+    steps: [
+      `Make sure you're using <em>Safari</em> — this won't work in Chrome or Firefox on iOS.`,
+      `Tap the <em>Share button</em> <span class="step-icon">⬆️</span> at the bottom of the Safari screen.`,
+      `Scroll the menu and tap <em>Add to Home Screen</em>.`,
+      `Tap <em>Add</em> in the top-right. The GingerSnaps icon will appear on your home screen! 🎉`,
+    ]
+  },
+  android: {
+    icon: '🤖',
+    heading: 'Add to Android Home Screen',
+    subtext: 'Install Smart GingerSnaps as an app — no Play Store required.',
+    steps: [
+      `Open this page in <em>Chrome</em>.`,
+      `Tap the <em>three-dot menu</em> <span class="step-icon">⋮</span> in the top-right corner.`,
+      `Tap <em>Add to Home screen</em> or <em>Install app</em>.`,
+      `Tap <em>Add</em> to confirm. Done! 🎉`,
+    ]
+  },
+  windows: {
+    icon: '🖥️',
+    heading: 'Install on Windows',
+    subtext: 'Install Smart GingerSnaps as a desktop app — works in Chrome or Edge.',
+    steps: [
+      `Open this page in <em>Chrome</em> or <em>Microsoft Edge</em>.`,
+      `Click the <em>install icon</em> <span class="step-icon">⊕</span> in the address bar (right side), OR`,
+      `Click the <em>three-dot menu</em> → <em>Install Smart GingerSnaps</em>.`,
+      `Click <em>Install</em>. A shortcut will appear on your desktop! 🎉`,
+    ]
+  },
+  mac: {
+    icon: '🍎',
+    heading: 'Install on Mac',
+    subtext: 'Install Smart GingerSnaps as a desktop app in Chrome or Edge.',
+    steps: [
+      `Open this page in <em>Chrome</em> or <em>Microsoft Edge</em>.`,
+      `Click the <em>install icon</em> <span class="step-icon">⊕</span> in the address bar, OR`,
+      `Click the <em>three-dot menu</em> → <em>Install Smart GingerSnaps</em>.`,
+      `Click <em>Install</em> to confirm. Done! 🎉`,
+    ]
+  },
+  desktop: {
+    icon: '💻',
+    heading: 'Install as a Desktop App',
+    subtext: 'Install Smart GingerSnaps as an app using Chrome or Edge.',
+    steps: [
+      `Open this page in <em>Chrome</em> or <em>Microsoft Edge</em>.`,
+      `Look for the <em>install icon</em> <span class="step-icon">⊕</span> in the address bar, OR`,
+      `Click the <em>three-dot menu</em> → <em>Install Smart GingerSnaps</em>.`,
+      `Click <em>Install</em> to confirm. Done! 🎉`,
+    ]
+  }
+};
+
+let deferredPrompt = null;
+
+/* Show "Install as an App" button to everyone not already in standalone */
+if (!isStandalone()) {
+  document.getElementById('install-app-btn').classList.remove('hidden');
+}
+
+/* Capture Chrome/Edge native install prompt */
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('native-install-btn').classList.remove('hidden');
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  document.getElementById('install-app-btn').classList.add('hidden');
+  document.getElementById('native-install-btn').classList.add('hidden');
+});
+
+function setupInstallScreen() {
+  const content = INSTALL_CONTENT[PLATFORM] || INSTALL_CONTENT.desktop;
+  document.getElementById('install-platform-icon').textContent = content.icon;
+  document.getElementById('install-heading').textContent       = content.heading;
+  document.getElementById('install-subtext').textContent       = content.subtext;
+
+  const stepsEl = document.getElementById('install-steps');
+  stepsEl.innerHTML = content.steps.map((text, i) => `
+    <div class="install-step">
+      <div class="step-num">${i + 1}</div>
+      <div class="step-text">${text}</div>
+    </div>
+  `).join('');
+
+  const alreadyEl = document.getElementById('install-already');
+  if (isStandalone()) {
+    alreadyEl.classList.remove('hidden');
+    document.getElementById('native-install-btn').classList.add('hidden');
+  } else {
+    alreadyEl.classList.add('hidden');
+  }
+}
+
+document.getElementById('install-app-btn').addEventListener('click', () => {
+  setupInstallScreen();
+  showScreen('install-screen');
+});
+document.getElementById('install-back-btn').addEventListener('click', () => showScreen('home-screen'));
+
+document.getElementById('native-install-btn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  if (outcome === 'accepted') {
+    document.getElementById('install-app-btn').classList.add('hidden');
+    document.getElementById('native-install-btn').classList.add('hidden');
+  }
+});
+
+/* ── LEVELS DATA ── */
 const LEVELS = [
-  {
-    id:1, name:'+1 Addition',    icon:'⭐', theme:'lc-t1', unlocked:true,
-    photo:'https://picsum.photos/seed/stars1/400/400',
-    problems:[
-      {n1:0,op:'+',n2:1,ans:1},{n1:1,op:'+',n2:1,ans:2},{n1:2,op:'+',n2:1,ans:3},
-      {n1:3,op:'+',n2:1,ans:4},{n1:4,op:'+',n2:1,ans:5},{n1:5,op:'+',n2:1,ans:6},
-      {n1:6,op:'+',n2:1,ans:7},{n1:7,op:'+',n2:1,ans:8},{n1:8,op:'+',n2:1,ans:9},
-      {n1:9,op:'+',n2:1,ans:10},
-    ]
-  },
-  {
-    id:2, name:'-1 Subtraction', icon:'🌟', theme:'lc-t2', unlocked:true,
-    photo:'https://picsum.photos/seed/sunset2/400/400',
-    problems:[
-      {n1:10,op:'-',n2:1,ans:9},{n1:9,op:'-',n2:1,ans:8},{n1:8,op:'-',n2:1,ans:7},
-      {n1:7,op:'-',n2:1,ans:6},{n1:6,op:'-',n2:1,ans:5},{n1:5,op:'-',n2:1,ans:4},
-      {n1:4,op:'-',n2:1,ans:3},{n1:3,op:'-',n2:1,ans:2},{n1:2,op:'-',n2:1,ans:1},
-      {n1:1,op:'-',n2:1,ans:0},
-    ]
-  },
-  {id:3, name:'+2 Addition',    icon:'🚀', theme:'lc-t3', unlocked:false, photo:'https://picsum.photos/seed/forest3/400/400',  problems:[]},
-  {id:4, name:'-2 Subtraction', icon:'🔥', theme:'lc-t4', unlocked:false, photo:'https://picsum.photos/seed/canyon4/400/400',  problems:[]},
-  {id:5, name:'+3 Addition',    icon:'🎯', theme:'lc-t5', unlocked:false, photo:'https://picsum.photos/seed/bloom5/400/400',   problems:[]},
-  {id:6, name:'-3 Subtraction', icon:'💎', theme:'lc-t6', unlocked:false, photo:'https://picsum.photos/seed/desert6/400/400', problems:[]},
-  {id:7, name:'Mix +/-',        icon:'🎪', theme:'lc-t7', unlocked:false, photo:'https://picsum.photos/seed/ocean7/400/400',  problems:[]},
-  {id:8, name:'Big Numbers',    icon:'👾', theme:'lc-t8', unlocked:false, photo:'https://picsum.photos/seed/city8/400/400',   problems:[]},
-  {id:9, name:'Challenge!',     icon:'👑', theme:'lc-t9', unlocked:false, photo:'https://picsum.photos/seed/peak9/400/400',   problems:[]},
+  { id:1, name:'+1 Addition',    icon:'⭐', theme:'lc-t1', unlocked:true,
+    problems:[{n1:0,op:'+',n2:1,ans:1},{n1:1,op:'+',n2:1,ans:2},{n1:2,op:'+',n2:1,ans:3},
+              {n1:3,op:'+',n2:1,ans:4},{n1:4,op:'+',n2:1,ans:5},{n1:5,op:'+',n2:1,ans:6},
+              {n1:6,op:'+',n2:1,ans:7},{n1:7,op:'+',n2:1,ans:8},{n1:8,op:'+',n2:1,ans:9},
+              {n1:9,op:'+',n2:1,ans:10}] },
+  { id:2, name:'-1 Subtraction', icon:'🌟', theme:'lc-t2', unlocked:true,
+    problems:[{n1:10,op:'-',n2:1,ans:9},{n1:9,op:'-',n2:1,ans:8},{n1:8,op:'-',n2:1,ans:7},
+              {n1:7,op:'-',n2:1,ans:6},{n1:6,op:'-',n2:1,ans:5},{n1:5,op:'-',n2:1,ans:4},
+              {n1:4,op:'-',n2:1,ans:3},{n1:3,op:'-',n2:1,ans:2},{n1:2,op:'-',n2:1,ans:1},
+              {n1:1,op:'-',n2:1,ans:0}] },
+  { id:3, name:'+2 Addition',    icon:'🚀', theme:'lc-t3', unlocked:false, problems:[] },
+  { id:4, name:'-2 Subtraction', icon:'🔥', theme:'lc-t4', unlocked:false, problems:[] },
+  { id:5, name:'+3 Addition',    icon:'🎯', theme:'lc-t5', unlocked:false, problems:[] },
+  { id:6, name:'-3 Subtraction', icon:'💎', theme:'lc-t6', unlocked:false, problems:[] },
+  { id:7, name:'Mix +/-',        icon:'🎪', theme:'lc-t7', unlocked:false, problems:[] },
+  { id:8, name:'Big Numbers',    icon:'👾', theme:'lc-t8', unlocked:false, problems:[] },
+  { id:9, name:'Challenge!',     icon:'👑', theme:'lc-t9', unlocked:false, problems:[] },
 ];
 
-/* =====================
-   STATE
-===================== */
-let currentLevel = null;
-let problems = [];
-let problemIndex = 0;
-let timerInterval = null;
-let elapsed = 0;
-let locked = false;
+/* ── STATE ── */
+let currentLevel=null, problems=[], problemIndex=0;
+let timerInterval=null, elapsed=0, locked=false;
 
-/* =====================
-   HELPERS
-===================== */
-const $ = id => document.getElementById(id);
+/* ── HELPERS ── */
+const $  = id => document.getElementById(id);
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(id).classList.add('active');
 }
-function fmtTime(s) {
-  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-}
-function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-/* =====================
-   WEB AUDIO SOUNDS
-   (synthesized — no files needed)
-===================== */
+const fmtTime = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+const shuffle  = arr => [...arr].sort(() => Math.random() - 0.5);
+
+/* ── WEB AUDIO ── */
 let audioCtx = null;
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return audioCtx;
 }
-
 function playSound(type) {
   try {
     const ctx = getCtx();
     if (ctx.state === 'suspended') ctx.resume();
-
     if (type === 'correct') {
-      // Bright two-note ascending chime: C5 → E5
       [523.25, 659.25].forEach((freq, i) => {
-        const osc  = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.value = freq;
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination); o.type = 'sine'; o.frequency.value = freq;
         const t = ctx.currentTime + i * 0.13;
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.38, t + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
-        osc.start(t); osc.stop(t + 0.35);
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.38,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
+        o.start(t); o.stop(t+0.35);
       });
-
     } else if (type === 'wrong') {
-      // Low dull thud — short detuned buzz
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(160, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.18);
-      gain.gain.setValueAtTime(0.28, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.25);
-
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination); o.type = 'sawtooth';
+      o.frequency.setValueAtTime(160,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(80,ctx.currentTime+0.18);
+      g.gain.setValueAtTime(0.28,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime+0.25);
     } else if (type === 'win') {
-      // Cheerful ascending fanfare: C5 E5 G5 C6
-      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
-        const osc  = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'triangle';
-        osc.frequency.value = freq;
-        const t = ctx.currentTime + i * 0.14;
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.32, t + 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
-        osc.start(t); osc.stop(t + 0.4);
+      [523.25,659.25,783.99,1046.5].forEach((freq,i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination); o.type = 'triangle'; o.frequency.value = freq;
+        const t = ctx.currentTime + i*0.14;
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.32,t+0.03); g.gain.exponentialRampToValueAtTime(0.001,t+0.38);
+        o.start(t); o.stop(t+0.4);
       });
-      // Add a little shimmer chord on top at the end
-      [1318.5, 1567.98].forEach((freq, i) => {
-        const osc  = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        const t = ctx.currentTime + 0.56 + i * 0.06;
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.18, t + 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
-        osc.start(t); osc.stop(t + 0.5);
+      [1318.5,1567.98].forEach((freq,i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination); o.type = 'sine'; o.frequency.value = freq;
+        const t = ctx.currentTime + 0.56 + i*0.06;
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.18,t+0.04); g.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+        o.start(t); o.stop(t+0.5);
       });
     }
-  } catch(e) { /* audio blocked — fail silently */ }
+  } catch(e) {}
 }
 
-/* =====================
-   BUILD LEVEL GRID
-===================== */
+/* ── LEVEL GRID ── */
 function buildGrid() {
   const grid = $('level-grid');
   grid.innerHTML = '';
   LEVELS.forEach(lv => {
     const card = document.createElement('div');
     card.className = `level-card ${lv.theme} ${lv.unlocked ? 'unlocked' : 'locked'}`;
-    card.style.backgroundImage = `url('${lv.photo}')`;
-    card.innerHTML = `
-      <div class="lc-icon">${lv.icon}</div>
-      <div class="lc-num">Level ${lv.id}</div>
-      <div class="lc-name">${lv.name}</div>
-      ${!lv.unlocked ? '<div class="lock-icon">🔒</div>' : ''}
-    `;
-    if (lv.unlocked) {
-      card.addEventListener('click', () => startLevel(lv));
-    }
+    card.innerHTML = `<div class="lc-icon">${lv.icon}</div><div class="lc-num">Level ${lv.id}</div><div class="lc-name">${lv.name}</div>${!lv.unlocked?'<div class="lock-icon">🔒</div>':''}`;
+    if (lv.unlocked) card.addEventListener('click', () => startLevel(lv));
     grid.appendChild(card);
   });
 }
 
-/* =====================
-   WRONG CHOICE GENERATOR
-===================== */
+/* ── WRONG CHOICES ── */
 function makeWrongs(correct) {
-  const wrongs = new Set();
-  let d = 1;
-  while (wrongs.size < 2) {
-    [correct + d, correct - d].forEach(v => {
-      if (v >= 0 && v !== correct && wrongs.size < 2) wrongs.add(v);
-    });
-    d++;
-  }
-  return [...wrongs];
+  const s = new Set(); let d = 1;
+  while (s.size < 2) { [correct+d,correct-d].forEach(v=>{ if(v>=0&&v!==correct&&s.size<2) s.add(v); }); d++; }
+  return [...s];
 }
 
-/* =====================
-   START LEVEL
-===================== */
+/* ── START LEVEL ── */
 function startLevel(lv) {
-  currentLevel = lv;
-  problems = shuffle(lv.problems);
-  problemIndex = 0;
-  elapsed = 0;
-  locked = false;
-
+  currentLevel = lv; problems = shuffle(lv.problems); problemIndex = 0; elapsed = 0; locked = false;
   clearInterval(timerInterval);
-  timerInterval = setInterval(() => { elapsed++; updateTimer(); }, 1000);
-
+  timerInterval = setInterval(() => { elapsed++; $('timer-display').textContent = fmtTime(elapsed); }, 1000);
   $('tc-level').textContent = `Level ${lv.id} — ${lv.name}`;
-  updateTimer();
-  buildPips();
-  showScreen('game-screen');
-  renderProblem(true);
+  $('timer-display').textContent = fmtTime(0);
+  buildPips(); showScreen('game-screen'); renderProblem(true);
 }
 
-/* =====================
-   PIPS
-===================== */
+/* ── PIPS ── */
 function buildPips() {
-  const row = $('pip-row');
-  row.innerHTML = '';
-  problems.forEach((_, i) => {
-    const pip = document.createElement('div');
-    pip.className = 'pip';
-    pip.id = `pip-${i}`;
-    row.appendChild(pip);
-  });
+  const row = $('pip-row'); row.innerHTML = '';
+  problems.forEach((_,i) => { const p=document.createElement('div'); p.className='pip'; p.id=`pip-${i}`; row.appendChild(p); });
   updatePips();
 }
 function updatePips() {
-  problems.forEach((_, i) => {
-    const pip = $(`pip-${i}`);
-    if (!pip) return;
-    pip.className = 'pip' + (i < problemIndex ? ' done' : i === problemIndex ? ' current' : '');
-  });
+  problems.forEach((_,i) => { const p=$(`pip-${i}`); if(!p) return; p.className='pip'+(i<problemIndex?' done':i===problemIndex?' current':''); });
 }
 
-/* =====================
-   RENDER PROBLEM
-===================== */
+/* ── RENDER PROBLEM ── */
 function renderProblem(first) {
   locked = false;
   const p = problems[problemIndex];
-  const total = problems.length;
-
-  $('tc-progress').textContent = `Problem ${problemIndex + 1} of ${total}`;
+  $('tc-progress').textContent = `Problem ${problemIndex+1} of ${problems.length}`;
   updatePips();
-
   const side = $('problem-side');
-  if (!first) {
-    side.style.opacity = '0';
-    side.style.transform = 'translateY(8px)';
-    side.style.transition = 'none';
-  }
-
+  if (!first) { side.style.cssText='opacity:0;transform:translateY(8px);transition:none'; }
   setTimeout(() => {
     $('prob-num1').textContent = p.n1;
     $('prob-op').textContent   = p.op;
     $('prob-num2').textContent = p.n2;
-    side.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
-    side.style.opacity = '1';
-    side.style.transform = 'translateY(0)';
+    side.style.cssText = 'opacity:1;transform:translateY(0);transition:opacity 0.22s ease,transform 0.22s ease';
   }, first ? 0 : 80);
-
-  // Build answer choices
-  const [w1, w2] = makeWrongs(p.ans);
-  const choices = shuffle([p.ans, w1, w2]);
-  document.querySelectorAll('.choice-btn').forEach((btn, i) => {
-    btn.textContent = choices[i];
-    btn.dataset.val = choices[i];
-    btn.className = 'choice-btn';
-    btn.disabled = false;
+  const [w1,w2] = makeWrongs(p.ans);
+  shuffle([p.ans,w1,w2]).forEach((val,i) => {
+    const btn = document.querySelectorAll('.choice-btn')[i];
+    btn.textContent = val; btn.dataset.val = val; btn.className='choice-btn'; btn.disabled=false;
   });
 }
 
-/* =====================
-   TIMER
-===================== */
-function updateTimer() {
-  $('timer-display').textContent = fmtTime(elapsed);
-}
-
-/* =====================
-   ANSWER HANDLER
-===================== */
+/* ── ANSWER ── */
 $('choices-side').addEventListener('click', e => {
   if (locked) return;
   const btn = e.target.closest('.choice-btn');
   if (!btn || btn.disabled) return;
-
-  const chosen = parseInt(btn.dataset.val);
-  const correct = problems[problemIndex].ans;
-
+  const chosen = parseInt(btn.dataset.val), correct = problems[problemIndex].ans;
   if (chosen === correct) {
-    locked = true;
-    btn.classList.add('state-correct');
-    playSound('correct');
-    setTimeout(() => {
-      problemIndex++;
-      if (problemIndex >= problems.length) {
-        finishLevel();
-      } else {
-        renderProblem(false);
-      }
-    }, 520);
+    locked = true; btn.classList.add('state-correct'); playSound('correct');
+    setTimeout(() => { problemIndex++; if(problemIndex>=problems.length) finishLevel(); else renderProblem(false); }, 520);
   } else {
-    btn.classList.add('state-wrong');
-    btn.disabled = true;
-    playSound('wrong');
-    setTimeout(() => {
-      btn.classList.remove('state-wrong');
-      btn.disabled = false;
-    }, 480);
+    btn.classList.add('state-wrong'); btn.disabled = true; playSound('wrong');
+    setTimeout(() => { btn.classList.remove('state-wrong'); btn.disabled=false; }, 480);
   }
 });
 
-/* =====================
-   FINISH LEVEL
-===================== */
+/* ── FINISH ── */
 function finishLevel() {
   clearInterval(timerInterval);
   $('complete-sub').textContent  = `Level ${currentLevel.id} — ${currentLevel.name}`;
   $('complete-time').textContent = fmtTime(elapsed);
-  showScreen('complete-screen');
-  launchConfetti();
-  playSound('win');
+  showScreen('complete-screen'); launchConfetti(); playSound('win');
 }
 
-/* =====================
-   HOME / ABANDON
-===================== */
-$('home-icon-btn').addEventListener('click', () => $('abandon-modal').classList.add('active'));
-$('modal-keep').addEventListener('click', () => $('abandon-modal').classList.remove('active'));
-$('modal-quit').addEventListener('click', () => {
-  $('abandon-modal').classList.remove('active');
-  clearInterval(timerInterval);
-  showScreen('level-screen');
-});
-
-/* =====================
-   NAV
-===================== */
-$('play-btn').addEventListener('click', () => showScreen('level-screen'));
+/* ── NAV ── */
+$('play-btn').addEventListener('click',         () => showScreen('level-screen'));
 $('back-to-home-btn').addEventListener('click', () => showScreen('home-screen'));
-$('play-again-btn').addEventListener('click', () => { stopConfetti(); startLevel(currentLevel); });
-$('back-to-levels-btn').addEventListener('click', () => { stopConfetti(); showScreen('level-screen'); });
+$('home-icon-btn').addEventListener('click',    () => $('abandon-modal').classList.add('active'));
+$('modal-keep').addEventListener('click',       () => $('abandon-modal').classList.remove('active'));
+$('modal-quit').addEventListener('click',       () => { $('abandon-modal').classList.remove('active'); clearInterval(timerInterval); showScreen('level-screen'); });
+$('play-again-btn').addEventListener('click',   () => { stopConfetti(); startLevel(currentLevel); });
+$('back-to-levels-btn').addEventListener('click',() => { stopConfetti(); showScreen('level-screen'); });
 
-/* =====================
-   CONFETTI
-===================== */
-const canvas = $('confetti-canvas');
-const ctx = canvas.getContext('2d');
-let particles = [];
-let confettiActive = false;
-let rafId = null;
-
-const COLORS = ['#e8621a','#2d7ef5','#18b870','#f5c518','#7c44f0','#f02a4a','#00bcd4','#ff6f61'];
-
-function resizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
+/* ── CONFETTI ── */
+const canvas = $('confetti-canvas'), ctx = canvas.getContext('2d');
+let particles=[], confettiActive=false, rafId=null;
+const COLORS=['#e8621a','#2d7ef5','#18b870','#f5c518','#7c44f0','#f02a4a','#00bcd4','#ff6f61'];
+function resizeCanvas() { canvas.width=innerWidth; canvas.height=innerHeight; }
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
 function launchConfetti() {
-  particles = [];
-  confettiActive = true;
-  for (let i = 0; i < 220; i++) {
-    const isRect = Math.random() > 0.45;
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: -20 - Math.random() * canvas.height * 0.5,
-      vx: (Math.random() - 0.5) * 5,
-      vy: Math.random() * 3.5 + 1.5,
-      rot: Math.random() * 360,
-      rotV: (Math.random() - 0.5) * 8,
-      w: Math.random() * 14 + 7,
-      h: Math.random() * 7 + 4,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      isRect,
-      gravity: 0.055 + Math.random() * 0.04,
-    });
+  particles=[]; confettiActive=true;
+  for(let i=0;i<220;i++) {
+    const isRect=Math.random()>0.45;
+    particles.push({x:Math.random()*canvas.width,y:-20-Math.random()*canvas.height*0.5,
+      vx:(Math.random()-0.5)*5,vy:Math.random()*3.5+1.5,rot:Math.random()*360,rotV:(Math.random()-0.5)*8,
+      w:Math.random()*14+7,h:Math.random()*7+4,color:COLORS[Math.floor(Math.random()*COLORS.length)],
+      isRect,gravity:0.055+Math.random()*0.04});
   }
   renderConfetti();
 }
-
 function renderConfetti() {
-  if (!confettiActive) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  let alive = 0;
+  if(!confettiActive) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  let alive=0;
   particles.forEach(p => {
-    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.rot += p.rotV;
-    if (p.y > canvas.height + 40) return;
-    alive++;
-    ctx.save();
-    ctx.globalAlpha = 1;
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rot * Math.PI / 180);
-    ctx.fillStyle = p.color;
-    if (p.isRect) {
-      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    } else {
-      ctx.beginPath();
-      ctx.ellipse(0, 0, p.w/2, p.h/2, 0, 0, Math.PI*2);
-      ctx.fill();
-    }
+    p.x+=p.vx; p.y+=p.vy; p.vy+=p.gravity; p.rot+=p.rotV;
+    if(p.y>canvas.height+40) return; alive++;
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color;
+    if(p.isRect) ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    else { ctx.beginPath(); ctx.ellipse(0,0,p.w/2,p.h/2,0,0,Math.PI*2); ctx.fill(); }
     ctx.restore();
   });
-  if (alive > 0) { rafId = requestAnimationFrame(renderConfetti); }
-  else { ctx.clearRect(0, 0, canvas.width, canvas.height); confettiActive = false; }
+  if(alive>0) rafId=requestAnimationFrame(renderConfetti);
+  else { ctx.clearRect(0,0,canvas.width,canvas.height); confettiActive=false; }
 }
-
 function stopConfetti() {
-  confettiActive = false;
-  if (rafId) cancelAnimationFrame(rafId);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles = [];
+  confettiActive=false; if(rafId) cancelAnimationFrame(rafId);
+  ctx.clearRect(0,0,canvas.width,canvas.height); particles=[];
 }
 
-/* =====================
-   INIT
-===================== */
+/* ── INIT ── */
 buildGrid();
 </script>
 </body>
