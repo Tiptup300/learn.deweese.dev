@@ -201,12 +201,7 @@ html, body {
   vertical-align: middle; margin: 0 2px; font-size: 13px; font-style: normal;
 }
 
-.install-already {
-  font-size: clamp(0.8rem,1.6vw,0.95rem); color: var(--green);
-  font-weight: 800; text-align: center;
-  background: rgba(24,184,112,0.08); border: 2px solid rgba(24,184,112,0.2);
-  border-radius: 14px; padding: 12px 20px;
-}
+
 
 /* ── SHARED ICON BTN ── */
 .icon-btn {
@@ -447,9 +442,7 @@ html, body {
       <div class="install-steps-title">Step by step</div>
       <div class="install-steps" id="install-steps"></div>
     </div>
-    <div class="install-already hidden" id="install-already">
-      ✅ Smart GingerSnaps is already installed on this device!
-    </div>
+
   </div>
 </div>
 
@@ -649,14 +642,6 @@ function setupInstallScreen() {
       <div class="step-text">${text}</div>
     </div>
   `).join('');
-
-  const alreadyEl = document.getElementById('install-already');
-  if (isStandalone()) {
-    alreadyEl.classList.remove('hidden');
-    document.getElementById('native-install-btn').classList.add('hidden');
-  } else {
-    alreadyEl.classList.add('hidden');
-  }
 }
 
 document.getElementById('install-app-btn').addEventListener('click', () => {
