@@ -991,7 +991,7 @@ $('choices-side').addEventListener('click', e => {
   if (chosen === correct) {
     locked = true;
     pipResults[problemIndex] = firstTry ? 'streak' : 'done';
-    streak = firstTry ? Math.min(streak + 1, 10) : 0;
+    streak = Math.min(streak + 1, 10);
     if (streak >= 8) {
       const best = getBest(currentLevel.id);
       if (best === null || elapsed < best) triggerShake(streak);
