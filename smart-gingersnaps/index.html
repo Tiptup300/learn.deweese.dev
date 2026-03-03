@@ -822,7 +822,7 @@ function playSound(type) {
     if (ctx.state === 'suspended') ctx.resume();
 
     if (type === 'correct') {
-      const idx      = Math.min(streak - 1, 7);
+      const idx      = Math.max(0, Math.min(streak - 1, 7));
       const freq     = SCALE_FREQS[idx];
       const isOctave = streak >= 8;
 
