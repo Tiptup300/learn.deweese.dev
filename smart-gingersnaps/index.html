@@ -89,10 +89,12 @@ html, body {
 
 .play-btn {
   width: clamp(90px,16vw,150px); height: clamp(90px,16vw,150px);
+  aspect-ratio: 1 / 1;
   border-radius: 50%; border: none; background: var(--ginger);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 6px 0 var(--ginger-dk), 0 10px 40px rgba(232,98,26,0.35);
   transition: transform 0.1s, box-shadow 0.1s;
+  flex-shrink: 0;
 }
 .play-btn:hover  { transform: translateY(-3px); box-shadow: 0 9px 0 var(--ginger-dk), 0 14px 48px rgba(232,98,26,0.4); }
 .play-btn:active { transform: translateY(3px);  box-shadow: 0 3px 0 var(--ginger-dk), 0 6px 24px rgba(232,98,26,0.3); }
@@ -252,6 +254,7 @@ html, body {
 .lc-num   { font-weight: 900; font-size: clamp(0.75rem,2vw,1.3rem); color: white; line-height: 1; }
 .lc-name  { font-weight: 800; font-size: clamp(0.5rem,1.2vw,0.8rem); color: rgba(255,255,255,0.88); text-align: center; }
 .lock-icon { position: absolute; bottom: 8px; right: 10px; font-size: clamp(0.9rem,2vw,1.4rem); opacity: 0.7; }
+.lc-best   { font-weight: 800; font-size: clamp(0.45rem,1vw,0.7rem); color: rgba(255,255,255,0.85); letter-spacing: 0.5px; }
 .lc-t1{background:#2d7ef5;border-color:#1a5cbf} .lc-t2{background:#e8621a;border-color:#b84c10}
 .lc-t3{background:#18b870;border-color:#0e8a52} .lc-t4{background:#f02a4a;border-color:#b51e38}
 .lc-t5{background:#7c44f0;border-color:#5a2fc0} .lc-t6{background:#f5c518;border-color:#c29a00}
@@ -279,15 +282,58 @@ html, body {
 .tc-progress { font-weight: 900; font-size: clamp(0.85rem,1.8vw,1.15rem); color: var(--text); white-space: nowrap; }
 .pip-row {
   display: flex; align-items: center; gap: clamp(3px,0.6vw,6px);
-  height: 14px; flex-wrap: nowrap; overflow: hidden;
+  height: 18px; flex-wrap: nowrap; overflow: visible;
+  padding: 2px 2px;
 }
 .pip {
   width: clamp(8px,1.2vw,12px); height: clamp(8px,1.2vw,12px);
   border-radius: 50%; background: #e0ddd8; flex-shrink: 0;
-  transition: background 0.25s, transform 0.25s;
+  border: 2px solid transparent;
+  transition: background 0.25s, transform 0.25s, box-shadow 0.2s, border-color 0.2s;
 }
 .pip.done    { background: var(--green); transform: scale(1.05); }
+.pip.streak  { background: var(--green); transform: scale(1.15); }
 .pip.current { background: var(--ginger); transform: scale(1.15); }
+
+/* ── wrong answer zap shake ── */
+@keyframes shakeWrong {
+  0%        { transform: translate(0,0); }
+  12%       { transform: translate(-8px, 3px); }
+  24%       { transform: translate(7px, -4px); }
+  36%       { transform: translate(-6px, 3px); }
+  48%       { transform: translate(6px, -2px); }
+  62%       { transform: translate(-4px, 2px); }
+  76%       { transform: translate(3px, -1px); }
+  88%       { transform: translate(-2px, 1px); }
+  100%      { transform: translate(0,0); }
+}
+.shake-wrong { animation: shakeWrong 0.22s ease-out; }
+
+/* ── streak screen shake (8→10) ── */
+@keyframes shake8 {
+  0%,100% { transform: translate(0,0); }
+  25%     { transform: translate(-2px, 1px); }
+  75%     { transform: translate(2px, -1px); }
+}
+@keyframes shake9 {
+  0%,100% { transform: translate(0,0); }
+  20%     { transform: translate(-4px, 2px); }
+  40%     { transform: translate(3px, -2px); }
+  60%     { transform: translate(-3px, 1px); }
+  80%     { transform: translate(4px, -1px); }
+}
+@keyframes shake10 {
+  0%,100% { transform: translate(0,0); }
+  15%     { transform: translate(-6px, 3px); }
+  30%     { transform: translate(5px, -3px); }
+  45%     { transform: translate(-5px, 2px); }
+  60%     { transform: translate(6px, -2px); }
+  75%     { transform: translate(-4px, 3px); }
+  90%     { transform: translate(4px, -2px); }
+}
+.shake8  { animation: shake8  0.35s ease; }
+.shake9  { animation: shake9  0.45s ease; }
+.shake10 { animation: shake10 0.55s ease; }
 .topbar-right {
   flex: 0 0 auto; display: flex; align-items: center; gap: 6px;
   background: #f0ebe4; border-radius: 12px;
@@ -296,9 +342,9 @@ html, body {
 }
 .timer-icon { font-size: clamp(0.85rem,1.5vw,1.1rem); }
 #timer-display {
-  font-weight: 900; font-size: clamp(0.9rem,2vw,1.3rem); color: var(--text);
+  font-weight: 700; font-size: clamp(0.9rem,2vw,1.3rem); color: #4a4a62;
   font-variant-numeric: tabular-nums; font-feature-settings: "tnum";
-  letter-spacing: 1px; min-width: 3.5ch; text-align: right;
+  letter-spacing: 1px; min-width: 3.5ch; text-align: right; color: #4a4a62;
 }
 .game-area {
   flex: 1; display: flex; align-items: stretch;
@@ -307,23 +353,23 @@ html, body {
 }
 .problem-side {
   flex: 1.3; display: flex; flex-direction: column;
-  justify-content: center; align-items: flex-start; gap: 0;
+  justify-content: center; align-items: center; gap: 0;
   background: white; border-radius: clamp(18px,2.5vw,30px);
   border: 3px solid var(--border); padding: clamp(20px,4vw,48px);
   box-shadow: 0 4px 0 var(--border);
 }
 .prob-stack { display: flex; flex-direction: column; align-items: flex-end; gap: clamp(2px,0.8vh,8px); }
 .prob-num1 {
-  font-weight: 1000; font-size: clamp(3.5rem,11vw,9rem); color: var(--text);
+  font-weight: 1000; font-size: clamp(3.5rem,11vw,9rem); color: #3d3d52;
   line-height: 1.05; letter-spacing: -3px; font-variant-numeric: tabular-nums;
 }
 .prob-row { display: flex; align-items: center; gap: clamp(6px,1.5vw,16px); }
 .prob-op  {
-  font-weight: 900; font-size: clamp(1.8rem,5vw,4.5rem);
+  font-weight: 700; font-size: clamp(1.5rem,4vw,3.5rem);
   line-height: 1.05; color: var(--ginger); letter-spacing: -1px; align-self: center;
 }
 .prob-num2 {
-  font-weight: 1000; font-size: clamp(3.5rem,11vw,9rem); color: var(--blue);
+  font-weight: 1000; font-size: clamp(3.5rem,11vw,9rem); color: #3d3d52;
   line-height: 1.05; letter-spacing: -3px; font-variant-numeric: tabular-nums;
 }
 .prob-divider { width: 100%; height: 4px; background: #d0ccc6; border-radius: 2px; margin-top: clamp(4px,1vh,10px); }
@@ -364,9 +410,12 @@ html, body {
 .complete-trophy { font-size: clamp(4rem,12vw,8rem); animation: mascotBob 2.5s ease-in-out infinite; }
 .complete-title  { font-weight: 1000; font-size: clamp(2rem,7vw,4.5rem); color: var(--ginger); letter-spacing: -1px; line-height: 1; }
 .complete-sub    { font-weight: 700; font-size: clamp(0.85rem,2vw,1.1rem); color: var(--muted); }
-.complete-stat   { display: inline-flex; align-items: center; gap: 10px; background: #fff8f0; border: 2px solid rgba(232,98,26,0.2); border-radius: 16px; padding: clamp(10px,1.5vh,16px) clamp(20px,3vw,32px); }
-.complete-stat-icon { font-size: clamp(1.1rem,2.5vw,1.6rem); }
+.complete-stats-row { display: flex; gap: clamp(12px,2vw,20px); width: 100%; }
+.complete-stat   { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fff8f0; border: 2px solid rgba(232,98,26,0.2); border-radius: 16px; padding: clamp(10px,1.5vh,16px) clamp(12px,2vw,20px); }
+.complete-stat-label { font-weight: 900; font-size: clamp(0.6rem,1.2vw,0.75rem); color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
 .complete-stat-val  { font-weight: 900; font-size: clamp(1.2rem,3vw,2rem); color: var(--ginger); font-variant-numeric: tabular-nums; }
+.complete-new-badge { font-weight: 1000; font-size: clamp(1rem,2.8vw,1.6rem); color: white; background: var(--green); border-radius: 12px; padding: clamp(6px,1vh,10px) clamp(16px,3vw,28px); letter-spacing: 2px; box-shadow: 0 4px 0 #0e8a52; animation: newBadgePop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes newBadgePop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
 .complete-btns  { display: flex; gap: 12px; width: 100%; flex-wrap: wrap; }
 .comp-btn { flex: 1; min-width: clamp(110px,24vw,190px); padding: clamp(12px,2vh,18px); border-radius: 16px; border: none; cursor: pointer; font-weight: 900; font-size: clamp(0.9rem,2vw,1.2rem); font-family: 'Nunito',sans-serif; transition: transform 0.1s; }
 .comp-btn:hover  { transform: translateY(-2px); }
@@ -503,10 +552,17 @@ html, body {
     <div class="complete-trophy">🏆</div>
     <div class="complete-title">You did it!</div>
     <div class="complete-sub" id="complete-sub">Level 1 Complete</div>
-    <div class="complete-stat">
-      <span class="complete-stat-icon">⏱</span>
-      <span class="complete-stat-val" id="complete-time">0:00</span>
+    <div class="complete-stats-row">
+      <div class="complete-stat">
+        <div class="complete-stat-label">SCORE</div>
+        <span class="complete-stat-val" id="complete-time">0:00</span>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-label">BEST</div>
+        <span class="complete-stat-val" id="complete-best">—</span>
+      </div>
     </div>
+    <div id="complete-new-badge" class="complete-new-badge" style="display:none">NEW BEST!</div>
     <div class="complete-btns">
       <button class="comp-btn again" id="play-again-btn">🔁 Play Again</button>
       <button class="comp-btn menu"  id="back-to-levels-btn">📋 All Levels</button>
@@ -677,14 +733,23 @@ const LEVELS = [
   { id:4, name:'-2 Subtraction', icon:'🔥', theme:'lc-t4', unlocked:false, problems:[] },
   { id:5, name:'+3 Addition',    icon:'🎯', theme:'lc-t5', unlocked:false, problems:[] },
   { id:6, name:'-3 Subtraction', icon:'💎', theme:'lc-t6', unlocked:false, problems:[] },
-  { id:7, name:'Mix +/-',        icon:'🎪', theme:'lc-t7', unlocked:false, problems:[] },
-  { id:8, name:'Big Numbers',    icon:'👾', theme:'lc-t8', unlocked:false, problems:[] },
+  { id:7, name:'+4 Addition',    icon:'🎪', theme:'lc-t7', unlocked:true,
+    problems:[{n1:0,op:'+',n2:4,ans:4},{n1:1,op:'+',n2:4,ans:5},{n1:2,op:'+',n2:4,ans:6},
+              {n1:3,op:'+',n2:4,ans:7},{n1:4,op:'+',n2:4,ans:8},{n1:5,op:'+',n2:4,ans:9},
+              {n1:6,op:'+',n2:4,ans:10}] },
+  { id:8, name:'-4 Subtraction', icon:'👾', theme:'lc-t8', unlocked:true,
+    problems:[{n1:10,op:'-',n2:4,ans:6},{n1:9,op:'-',n2:4,ans:5},{n1:8,op:'-',n2:4,ans:4},
+              {n1:7,op:'-',n2:4,ans:3},{n1:6,op:'-',n2:4,ans:2},{n1:5,op:'-',n2:4,ans:1},
+              {n1:4,op:'-',n2:4,ans:0}] },
   { id:9, name:'Challenge!',     icon:'👑', theme:'lc-t9', unlocked:false, problems:[] },
 ];
 
 /* ── STATE ── */
 let currentLevel=null, problems=[], problemIndex=0;
 let timerInterval=null, elapsed=0, locked=false;
+let streak=0;
+let firstTry=true;          // true until user misses current problem
+let pipResults=[];          // 'streak' | 'done' | null per problem
 
 /* ── HELPERS ── */
 const $  = id => document.getElementById(id);
@@ -696,41 +761,126 @@ const fmtTime = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 const shuffle  = arr => [...arr].sort(() => Math.random() - 0.5);
 
 /* ── WEB AUDIO ── */
+const SCALE_FREQS = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50];
+
 let audioCtx = null;
+let rumbleOsc = null, rumbleGainNode = null;
+
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return audioCtx;
 }
+
+function startRumble() {
+  if (rumbleOsc) return;
+  try {
+    const ctx = getCtx();
+    rumbleOsc      = ctx.createOscillator();
+    rumbleGainNode = ctx.createGain();
+    const filter   = ctx.createBiquadFilter();
+    filter.type = 'lowpass'; filter.frequency.value = 130;
+    rumbleOsc.type = 'sawtooth'; rumbleOsc.frequency.value = 52;
+    rumbleOsc.connect(filter); filter.connect(rumbleGainNode); rumbleGainNode.connect(ctx.destination);
+    rumbleGainNode.gain.setValueAtTime(0, ctx.currentTime);
+    rumbleGainNode.gain.linearRampToValueAtTime(0.10, ctx.currentTime + 0.5);
+    rumbleOsc.start(ctx.currentTime);
+  } catch(e) {}
+}
+
+function stopRumble(fadeTime = 0.5) {
+  if (!rumbleOsc) return;
+  try {
+    const ctx = getCtx();
+    rumbleGainNode.gain.cancelScheduledValues(ctx.currentTime);
+    rumbleGainNode.gain.setValueAtTime(rumbleGainNode.gain.value, ctx.currentTime);
+    rumbleGainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + fadeTime);
+    const stopped = rumbleOsc;
+    setTimeout(() => { try { stopped.stop(); } catch(e) {} }, (fadeTime + 0.1) * 1000);
+  } catch(e) {}
+  rumbleOsc = null; rumbleGainNode = null;
+}
+
+// Schedule a decaying echo: plays note at freq, then fires repeats copies, each quieter by `decay`.
+function scheduleWithEcho(ctx, freq, volume, duration, repeats, delayStep, decay) {
+  for (let i = 0; i <= repeats; i++) {
+    const t   = ctx.currentTime + i * delayStep;
+    const vol = volume * Math.pow(decay, i);
+    if (vol < 0.004) break;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + duration);
+    o.start(t); o.stop(t + duration + 0.05);
+  }
+}
+
 function playSound(type) {
   try {
     const ctx = getCtx();
     if (ctx.state === 'suspended') ctx.resume();
+
     if (type === 'correct') {
-      [523.25, 659.25].forEach((freq, i) => {
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.connect(g); g.connect(ctx.destination); o.type = 'sine'; o.frequency.value = freq;
-        const t = ctx.currentTime + i * 0.13;
-        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.38,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
-        o.start(t); o.stop(t+0.35);
-      });
+      const idx      = Math.min(streak - 1, 7);
+      const freq     = SCALE_FREQS[idx];
+      const isOctave = streak >= 8;
+
+      // Echo config — none below 9, moderate at 9, maxed at 10
+      const echoRepeats   = streak >= 10 ? 9  : streak >= 9 ? 2  : 0;
+      const echoDelayStep = streak >= 10 ? 0.15 : 0.22;
+      const echoDecay     = streak >= 10 ? 0.68 : 0.42;
+      const noteDuration  = isOctave ? 0.55 : 0.32;
+
+      // Root note
+      scheduleWithEcho(ctx, freq, 0.42, noteDuration, echoRepeats, echoDelayStep, echoDecay);
+
+      // Major third (streak 9+)
+      if (streak >= 9)
+        scheduleWithEcho(ctx, freq * 1.25, 0.28, noteDuration, echoRepeats, echoDelayStep, echoDecay);
+
+      // Perfect fifth (streak 10)
+      if (streak >= 10)
+        scheduleWithEcho(ctx, freq * 1.5, 0.22, noteDuration, echoRepeats, echoDelayStep, echoDecay);
+
+      // Octave sparkle burst (streak 8+)
+      if (isOctave) {
+        [freq * 2, freq * 2.5].forEach((f, i) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.type = 'sine'; o.frequency.value = f;
+          const t = ctx.currentTime + 0.22 + i * 0.1;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.15, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+          o.start(t); o.stop(t + 0.22);
+        });
+      }
+
+      // Start rumble at streak 10
+      if (streak >= 10) startRumble();
+
     } else if (type === 'wrong') {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination); o.type = 'sawtooth';
-      o.frequency.setValueAtTime(160,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(80,ctx.currentTime+0.18);
-      g.gain.setValueAtTime(0.28,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22);
-      o.start(ctx.currentTime); o.stop(ctx.currentTime+0.25);
+      o.frequency.setValueAtTime(160, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.18);
+      g.gain.setValueAtTime(0.28, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.25);
+
     } else if (type === 'win') {
-      [523.25,659.25,783.99,1046.5].forEach((freq,i) => {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination); o.type = 'triangle'; o.frequency.value = freq;
-        const t = ctx.currentTime + i*0.14;
+        const t = ctx.currentTime + i * 0.14;
         g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.32,t+0.03); g.gain.exponentialRampToValueAtTime(0.001,t+0.38);
         o.start(t); o.stop(t+0.4);
       });
-      [1318.5,1567.98].forEach((freq,i) => {
+      [1318.5, 1567.98].forEach((freq, i) => {
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination); o.type = 'sine'; o.frequency.value = freq;
-        const t = ctx.currentTime + 0.56 + i*0.06;
+        const t = ctx.currentTime + 0.56 + i * 0.06;
         g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.18,t+0.04); g.gain.exponentialRampToValueAtTime(0.001,t+0.45);
         o.start(t); o.stop(t+0.5);
       });
@@ -745,7 +895,9 @@ function buildGrid() {
   LEVELS.forEach(lv => {
     const card = document.createElement('div');
     card.className = `level-card ${lv.theme} ${lv.unlocked ? 'unlocked' : 'locked'}`;
-    card.innerHTML = `<div class="lc-icon">${lv.icon}</div><div class="lc-num">Level ${lv.id}</div><div class="lc-name">${lv.name}</div>${!lv.unlocked?'<div class="lock-icon">🔒</div>':''}`;
+    const best = getBest(lv.id);
+    const bestStr = best !== null ? fmtTime(best) : null;
+    card.innerHTML = `<div class="lc-icon">${lv.icon}</div><div class="lc-num">Level ${lv.id}</div><div class="lc-name">${lv.name}</div>${bestStr ? `<div class="lc-best">⏱ ${bestStr}</div>` : ""}${!lv.unlocked?'<div class="lock-icon">🔒</div>':''}`;
     if (lv.unlocked) card.addEventListener('click', () => startLevel(lv));
     grid.appendChild(card);
   });
@@ -760,7 +912,10 @@ function makeWrongs(correct) {
 
 /* ── START LEVEL ── */
 function startLevel(lv) {
+  stopRumble(0.15);
+  stopShake();
   currentLevel = lv; problems = shuffle(lv.problems); problemIndex = 0; elapsed = 0; locked = false;
+  streak = 0; firstTry = true; pipResults = [];
   clearInterval(timerInterval);
   timerInterval = setInterval(() => { elapsed++; $('timer-display').textContent = fmtTime(elapsed); }, 1000);
   $('tc-level').textContent = `Level ${lv.id} — ${lv.name}`;
@@ -775,12 +930,22 @@ function buildPips() {
   updatePips();
 }
 function updatePips() {
-  problems.forEach((_,i) => { const p=$(`pip-${i}`); if(!p) return; p.className='pip'+(i<problemIndex?' done':i===problemIndex?' current':''); });
+  problems.forEach((_,i) => {
+    const p = $(`pip-${i}`); if(!p) return;
+    if (i < problemIndex) {
+      p.className = 'pip ' + (pipResults[i] || 'done');
+    } else if (i === problemIndex) {
+      p.className = 'pip current';
+    } else {
+      p.className = 'pip';
+    }
+  });
 }
 
 /* ── RENDER PROBLEM ── */
 function renderProblem(first) {
   locked = false;
+  firstTry = true;
   const p = problems[problemIndex];
   $('tc-progress').textContent = `Problem ${problemIndex+1} of ${problems.length}`;
   updatePips();
@@ -799,6 +964,24 @@ function renderProblem(first) {
   });
 }
 
+/* ── SCREEN SHAKE ── */
+let shakeTimeout = null;
+function triggerShake(level) {
+  const el = $('game-screen');
+  // remove any existing shake class first
+  el.classList.remove('shake8', 'shake9', 'shake10', 'shake-wrong');
+  // force reflow so re-adding the class restarts the animation
+  void el.offsetWidth;
+  if (level >= 10)      el.classList.add('shake10');
+  else if (level >= 9)  el.classList.add('shake9');
+  else if (level >= 8)  el.classList.add('shake8');
+}
+function stopShake() {
+  clearTimeout(shakeTimeout);
+  const el = $('game-screen');
+  if (el) el.classList.remove('shake8', 'shake9', 'shake10', 'shake-wrong');
+}
+
 /* ── ANSWER ── */
 $('choices-side').addEventListener('click', e => {
   if (locked) return;
@@ -806,19 +989,56 @@ $('choices-side').addEventListener('click', e => {
   if (!btn || btn.disabled) return;
   const chosen = parseInt(btn.dataset.val), correct = problems[problemIndex].ans;
   if (chosen === correct) {
-    locked = true; btn.classList.add('state-correct'); playSound('correct');
+    locked = true;
+    pipResults[problemIndex] = firstTry ? 'streak' : 'done';
+    streak = firstTry ? Math.min(streak + 1, 10) : 0;
+    if (streak >= 8) {
+      const best = getBest(currentLevel.id);
+      if (best === null || elapsed < best) triggerShake(streak);
+    }
+    btn.classList.add('state-correct');
+    playSound('correct');
     setTimeout(() => { problemIndex++; if(problemIndex>=problems.length) finishLevel(); else renderProblem(false); }, 520);
   } else {
-    btn.classList.add('state-wrong'); btn.disabled = true; playSound('wrong');
+    stopRumble(0.25);
+    streak = 0;
+    firstTry = false;
+    stopShake();
+    // zap shake synced to the error sound (~220ms)
+    const gs = $('game-screen');
+    gs.classList.remove('shake-wrong'); void gs.offsetWidth;
+    gs.classList.add('shake-wrong');
+    btn.classList.add('state-wrong'); btn.disabled = true;
+    playSound('wrong');
     setTimeout(() => { btn.classList.remove('state-wrong'); btn.disabled=false; }, 480);
   }
 });
 
 /* ── FINISH ── */
+/* ── HIGH SCORES ── */
+function getBest(levelId) {
+  try { const v = localStorage.getItem('gs_best_' + levelId); return v !== null ? parseInt(v) : null; } catch(e) { return null; }
+}
+function setBest(levelId, seconds) {
+  try { localStorage.setItem('gs_best_' + levelId, seconds); } catch(e) {}
+}
+
 function finishLevel() {
   clearInterval(timerInterval);
+  const prev  = getBest(currentLevel.id);
+  const isNew = prev === null || elapsed < prev;
+  if (isNew) setBest(currentLevel.id, elapsed);
+
   $('complete-sub').textContent  = `Level ${currentLevel.id} — ${currentLevel.name}`;
   $('complete-time').textContent = fmtTime(elapsed);
+  $('complete-best').textContent = isNew ? fmtTime(elapsed) : fmtTime(prev);
+
+  const badge = $('complete-new-badge');
+  badge.style.display = isNew ? 'block' : 'none';
+  if (isNew) { void badge.offsetWidth; badge.style.animation = 'none'; void badge.offsetWidth; badge.style.animation = ''; }
+
+  stopRumble(1.2);
+  stopShake();
   showScreen('complete-screen'); launchConfetti(); playSound('win');
 }
 
@@ -827,9 +1047,9 @@ $('play-btn').addEventListener('click',         () => showScreen('level-screen')
 $('back-to-home-btn').addEventListener('click', () => showScreen('home-screen'));
 $('home-icon-btn').addEventListener('click',    () => $('abandon-modal').classList.add('active'));
 $('modal-keep').addEventListener('click',       () => $('abandon-modal').classList.remove('active'));
-$('modal-quit').addEventListener('click',       () => { $('abandon-modal').classList.remove('active'); clearInterval(timerInterval); showScreen('level-screen'); });
+$('modal-quit').addEventListener('click',       () => { $('abandon-modal').classList.remove('active'); clearInterval(timerInterval); buildGrid(); showScreen('level-screen'); });
 $('play-again-btn').addEventListener('click',   () => { stopConfetti(); startLevel(currentLevel); });
-$('back-to-levels-btn').addEventListener('click',() => { stopConfetti(); showScreen('level-screen'); });
+$('back-to-levels-btn').addEventListener('click',() => { stopConfetti(); buildGrid(); showScreen('level-screen'); });
 
 /* ── CONFETTI ── */
 const canvas = $('confetti-canvas'), ctx = canvas.getContext('2d');
