@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #eef1ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+    gap: 32px;
+  }
+
+  /* Top bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 420px;
+    max-width: 90vw;
+  }
+
+  .clear-btn {
+    background: none;
+    border: 2px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #94a3b8;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .clear-btn:hover { border-color: #f87171; color: #f87171; }
+
+  /* Level controls */
+  .level-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .lvl-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: #5c6fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+  }
+  .lvl-btn:active { transform: scale(0.88); }
+
+  .level-display { text-align: center; min-width: 160px; }
+  .level-display .num  { font-size: 1.2rem; font-weight: 900; color: #333; }
+  .level-display .desc { font-size: 0.92rem; font-weight: 700; color: #aaa; margin-top: 2px; }
+
+  /* Side labels + card area */
+  .swipe-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .side-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    width: 48px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .side-label.left  { color: #9ca3af; }
+  .side-label.right { color: #22c55e; }
+
+  /* Card wrap */
+  .card-wrap { width: 300px; height: 200px; position: relative; }
+
+  .bg-layer {
+    position: absolute; inset: 0; border-radius: 22px;
+    opacity: 0; pointer-events: none;
+  }
+  .bg-left  { background: linear-gradient(to right, #d1d5db, #e5e7eb); }
+  .bg-right { background: linear-gradient(to left,  #bbf7d0, #dcfce7); }
+
+  .card {
+    position: absolute; inset: 0;
+    background: white;
+    border-radius: 22px;
+    box-shadow: 0 10px 36px rgba(0,0,0,0.11);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.8rem;
+    font-weight: 900;
+    color: #1e293b;
+    cursor: grab;
+    touch-action: none;
+    will-change: transform;
+  }
+  .card:active { cursor: grabbing; }
+
+  .card-label {
+    position: absolute;
+    top: 14px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.08s;
+  }
+  .card-label.left  { left: 16px;  color: #9ca3af; }
+  .card-label.right { right: 16px; color: #16a34a; }
+
+  /* Done screen */
+  .done-screen {
+    display: none;
+    position: absolute; inset: 0;
+    background: white;
+    border-radius: 22px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 10px 36px rgba(0,0,0,0.11);
+  }
+  .done-screen.show { display: flex; }
+  .done-screen .emoji { font-size: 2.8rem; }
+  .done-screen .msg   { font-size: 1.3rem; font-weight: 900; color: #333; }
+  .done-screen .sub   { font-size: 0.85rem; font-weight: 700; color: #aaa; }
+
+  .count {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #cbd5e1;
+    height: 1.2em;
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <div style="width:80px"></div>
+  <div class="level-row">
+    <button class="lvl-btn" id="btnMinus">−</button>
+    <div class="level-display">
+      <div class="num">Level <span id="lvlNum"></span></div>
+      <div class="desc" id="lvlDesc"></div>
+    </div>
+    <button class="lvl-btn" id="btnPlus">+</button>
+  </div>
+  <button class="clear-btn" id="clearBtn">Clear all</button>
+</div>
+
+<!-- Swipe area -->
+<div class="swipe-row">
+  <div class="side-label left">← Skip</div>
+  <div class="card-wrap">
+    <div class="bg-layer bg-left"  id="bgLeft"></div>
+    <div class="bg-layer bg-right" id="bgRight"></div>
+    <div class="card" id="card">
+      <span class="card-label left"  id="lblLeft">Skip</span>
+      <span id="cardText"></span>
+      <span class="card-label right" id="lblRight">Done ✓</span>
+    </div>
+    <div class="done-screen" id="doneScreen">
+      <div class="emoji">🎉</div>
+      <div class="msg">All done!</div>
+      <div class="sub">Change level or come back later</div>
+    </div>
+  </div>
+  <div class="side-label right">Done →</div>
+</div>
+
+<div class="count" id="count"></div>
+
+<script>
+const LEVELS = [
+  { num: "3 & 4", desc: "+2 & −2", cards: ["0+2","1+2","2+2","3+2","4+2","5+2","6+2","7+2","8+2","9+2","10-2","9-2","8-2","7-2","6-2","5-2","4-2","3-2","2-2"] },
+  { num: "7 & 8", desc: "+4 & −4", cards: ["0+4","1+4","2+4","3+4","4+4","5+4","6+4","7+4","8+4","9+4","10+4","10-4","9-4","8-4","7-4","6-4","5-4","4-4"] },
+  { num: "9 & 10", desc: "+5 & −5", cards: ["0+5","1+5","2+5","3+5","4+5","5+5","6+5","7+5","8+5","9+5","10+5","10-5","9-5","8-5","7-5","6-5","5-5"] },
+  { num: "15", desc: "+6", cards: ["0+6","1+6","2+6","3+6","4+6","5+6","6+6","7+6","8+6","9+6","10+6","11+6","12+6","13+6","14+6"] },
+  { num: "16", desc: "−6", cards: ["20-6","19-6","18-6","17-6","16-6","15-6","14-6","13-6","12-6","11-6","10-6","9-6","8-6","7-6","6-6"] },
+  { num: "17", desc: "+7", cards: ["0+7","1+7","2+7","3+7","4+7","5+7","6+7","7+7","8+7","9+7","10+7","11+7","12+7","13+7"] },
+  { num: "18", desc: "−7", cards: ["20-7","19-7","18-7","17-7","16-7","15-7","14-7","13-7","12-7","11-7","10-7","9-7","8-7","7-7"] },
+  { num: "19", desc: "+8", cards: ["0+8","1+8","2+8","3+8","4+8","5+8","6+8","7+8","8+8","9+8","10+8","11+8","12+8"] },
+  { num: "20", desc: "−8", cards: ["20-8","19-8","18-8","17-8","16-8","15-8","14-8","13-8","12-8","11-8","10-8","9-8","8-8"] },
+  { num: "21", desc: "+9", cards: ["0+9","1+9","2+9","3+9","4+9","5+9","6+9","7+9","8+9","9+9","10+9","11+9"] },
+  { num: "22", desc: "−9", cards: ["20-9","19-9","18-9","17-9","16-9","15-9","14-9","13-9","12-9","11-9","10-9","9-9"] },
+  { num: "23", desc: "+10", cards: ["0+10","1+10","2+10","3+10","4+10","5+10","6+10","7+10","8+10","9+10","10+10"] },
+  { num: "24", desc: "−10", cards: ["20-10","19-10","18-10","17-10","16-10","15-10","14-10","13-10","12-10","11-10","10-10"] },
+  { num: "25", desc: "Doubles", cards: ["1+1","2+2","3+3","4+4","5+5","6+6","7+7","8+8","9+9","10+10"] }
+];
+
+const LS_KEY = "flashcards_v1";
+
+function fmt(s) { return s.replace("+", " + ").replace("-", " − "); }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// --- Persistence ---
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function saveState() {
+  try {
+    // doneMap: { levelIdx: [array of done card strings] }
+    const serialDone = {};
+    for (const [k, v] of Object.entries(doneMap)) {
+      serialDone[k] = [...v];
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      lvl,
+      doneMap: serialDone,
+      remaining
+    }));
+  } catch(e) {}
+}
+
+function clearState() {
+  localStorage.removeItem(LS_KEY);
+}
+
+// --- State ---
+let lvl = 0;
+let doneMap = {};   // { levelIdx: Set<string> }
+let remaining = []; // ordered array of card strings for current level
+let currentCard = null;
+
+const cardEl    = document.getElementById('card');
+const cardText  = document.getElementById('cardText');
+const doneScr   = document.getElementById('doneScreen');
+const countEl   = document.getElementById('count');
+const bgLeft    = document.getElementById('bgLeft');
+const bgRight   = document.getElementById('bgRight');
+const lblLeft   = document.getElementById('lblLeft');
+const lblRight  = document.getElementById('lblRight');
+
+function init() {
+  const saved = loadState();
+  if (saved) {
+    lvl = saved.lvl || 0;
+    // restore doneMap as Sets
+    doneMap = {};
+    for (const [k, v] of Object.entries(saved.doneMap || {})) {
+      doneMap[k] = new Set(v);
+    }
+    // restore remaining, but validate cards still exist in that level
+    const validCards = new Set(LEVELS[lvl].cards);
+    remaining = (saved.remaining || []).filter(c => validCards.has(c));
+    // if remaining is somehow empty but not all done, reshuffle undone
+    if (!remaining.length) {
+      const done = doneMap[lvl] || new Set();
+      remaining = shuffle(LEVELS[lvl].cards.filter(c => !done.has(c)));
+    }
+  } else {
+    lvl = 0;
+    remaining = shuffle(LEVELS[0].cards);
+  }
+  renderLevel();
+  showNext(false);
+}
+
+function renderLevel() {
+  document.getElementById('lvlNum').textContent = LEVELS[lvl].num;
+  document.getElementById('lvlDesc').textContent = LEVELS[lvl].desc;
+}
+
+function setLevel(idx) {
+  lvl = idx;
+  const done = doneMap[idx] || new Set();
+  remaining = shuffle(LEVELS[idx].cards.filter(c => !done.has(c)));
+  renderLevel();
+  showNext(false);
+  saveState();
+}
+
+function showNext(animate) {
+  resetOverlays();
+  if (!remaining.length) {
+    doneScr.classList.add('show');
+    cardEl.style.display = 'none';
+    countEl.textContent = '';
+    saveState();
+    return;
+  }
+  doneScr.classList.remove('show');
+  cardEl.style.display = 'flex';
+  currentCard = remaining[0];
+  countEl.textContent = remaining.length + ' left';
+
+  if (animate) {
+    cardEl.style.transition = 'none';
+    cardEl.style.opacity = '0';
+    cardEl.style.transform = 'scale(0.88)';
+    cardText.textContent = fmt(currentCard);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      cardEl.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      cardEl.style.opacity = '1';
+      cardEl.style.transform = '';
+    }));
+  } else {
+    cardEl.style.transition = 'none';
+    cardEl.style.transform = '';
+    cardEl.style.opacity = '1';
+    cardText.textContent = fmt(currentCard);
+  }
+}
+
+function resetOverlays() {
+  bgLeft.style.opacity = bgRight.style.opacity = '0';
+  lblLeft.style.opacity = lblRight.style.opacity = '0';
+}
+
+function updateOverlays(x) {
+  const t = Math.min(Math.abs(x) / 120, 1);
+  if (x > 0) {
+    bgRight.style.opacity = (t * 0.55).toString();
+    bgLeft.style.opacity  = '0';
+    lblRight.style.opacity = t.toString();
+    lblLeft.style.opacity  = '0';
+  } else if (x < 0) {
+    bgLeft.style.opacity  = (t * 0.55).toString();
+    bgRight.style.opacity = '0';
+    lblLeft.style.opacity  = t.toString();
+    lblRight.style.opacity = '0';
+  } else {
+    resetOverlays();
+  }
+}
+
+function swipeAway(dir) {
+  if (!currentCard) return;
+
+  cardEl.style.transition = 'transform 0.22s ease, opacity 0.18s ease';
+  cardEl.style.transform = `translateX(${dir * 520}px) rotate(${dir * 18}deg)`;
+  cardEl.style.opacity = '0';
+
+  setTimeout(() => {
+    if (dir === 1) {
+      // Done — remove permanently
+      if (!doneMap[lvl]) doneMap[lvl] = new Set();
+      doneMap[lvl].add(currentCard);
+      remaining = remaining.slice(1);
+    } else {
+      // Skip — move to back
+      remaining = [...remaining.slice(1), remaining[0]];
+    }
+    cardEl.style.transition = 'none';
+    cardEl.style.transform = '';
+    cardEl.style.opacity = '1';
+    showNext(true);
+    saveState();
+  }, 230);
+}
+
+function clearAll() {
+  if (!confirm('Clear all progress for every level?')) return;
+  doneMap = {};
+  clearState();
+  remaining = shuffle(LEVELS[lvl].cards);
+  showNext(false);
+}
+
+// Buttons
+document.getElementById('btnMinus').onclick = () => { if (lvl > 0) setLevel(lvl - 1); };
+document.getElementById('btnPlus').onclick  = () => { if (lvl < LEVELS.length - 1) setLevel(lvl + 1); };
+document.getElementById('clearBtn').onclick = clearAll;
+
+// Drag
+let startX = 0, dragging = false, curX = 0;
+
+function onStart(x) {
+  if (!remaining.length) return;
+  startX = x; curX = 0; dragging = true;
+  cardEl.style.transition = 'none';
+}
+function onMove(x) {
+  if (!dragging) return;
+  curX = x - startX;
+  cardEl.style.transform = `translateX(${curX}px) rotate(${curX * 0.07}deg)`;
+  updateOverlays(curX);
+}
+function onEnd() {
+  if (!dragging) return;
+  dragging = false;
+  if (Math.abs(curX) > 80) {
+    swipeAway(curX > 0 ? 1 : -1);
+  } else {
+    cardEl.style.transition = 'transform 0.25s ease';
+    cardEl.style.transform = '';
+    resetOverlays();
+  }
+}
+
+cardEl.addEventListener('mousedown',  e => onStart(e.clientX));
+window.addEventListener('mousemove',  e => { if (dragging) onMove(e.clientX); });
+window.addEventListener('mouseup',    onEnd);
+cardEl.addEventListener('touchstart', e => onStart(e.touches[0].clientX), { passive: true });
+window.addEventListener('touchmove',  e => { if (dragging) onMove(e.touches[0].clientX); }, { passive: true });
+window.addEventListener('touchend',   onEnd);
+window.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  swipeAway(-1);
+  if (e.key === 'ArrowRight') swipeAway(1);
+});
+
+init();
+</script>
+</body>
+</html>
